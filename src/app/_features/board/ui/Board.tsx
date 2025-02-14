@@ -1,4 +1,4 @@
-import Todo from "../todo/Todo";
+import Todo from "../../todo/Todo";
 
 export default function Board() {
   return (

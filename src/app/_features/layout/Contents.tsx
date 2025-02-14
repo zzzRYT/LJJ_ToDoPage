@@ -1,4 +1,4 @@
-import Board from "./board/Board";
+import Board from "../board/ui/Board";
 
 export default function Contents() {
   return (
