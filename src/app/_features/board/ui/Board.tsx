@@ -1,10 +1,12 @@
+import { BoardType } from "@/app/_store/boardStore";
 import Todo from "../../todo/Todo";
 
-export default function Board() {
+export default function Board({ title, todos }: BoardType) {
+  console.log(todos);
   return (
     <div className="mr-2 w-[350px] min-w-[350px] flex flex-col overflow-hidden rounded-lg transition-transform duration-75 border border-gray-700">
       <div className="flex-row gap-4 flex flex-shrink-0 p-2">
-        <h2>보드 이름</h2>
+        <h2>{title}</h2>
         <span className="rounded-full bg-gray-200 w-5 h-5 flex justify-center items-center">
           2
         </span>

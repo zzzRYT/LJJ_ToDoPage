@@ -27,7 +27,11 @@ export const useBoardStore = create<BoardStoreType>()(
         set((state) => ({
           boards: [
             ...state.boards,
-            { id: Math.random().toString(), title, todos: [] },
+            {
+              id: (Math.random() * 10000).toFixed().toString(),
+              title,
+              todos: [],
+            },
           ],
         })),
       removeBoard: (id) =>
