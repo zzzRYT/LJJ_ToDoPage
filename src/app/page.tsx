@@ -1,3 +1,11 @@
+import Contents from "./_components/Contents";
+import Header from "./_components/layout/Header";
+
 export default function Home() {
-  return <div>11</div>;
+  return (
+    <>
+      <Header />
+      <Contents />
+    </>
+  );
 }
