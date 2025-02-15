@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface TodoType {
   id: number;
@@ -15,32 +14,34 @@ export interface BoardType {
 
 export interface BoardStoreType {
   boards: BoardType[];
-  addBoard: (title: string) => void;
+  setBoards: (boards: BoardType[]) => void;
+  addBoard: (params: BoardType) => void;
+  updateBoard: ({ title, id }: Omit<BoardType, "todos">) => void;
   removeBoard: (id: string) => void;
 }
 
-export const useBoardStore = create<BoardStoreType>()(
-  persist(
-    (set) => ({
-      boards: [] as BoardType[],
-      addBoard: (title) =>
-        set((state) => ({
-          boards: [
-            ...state.boards,
-            {
-              id: (Math.random() * 10000).toFixed().toString(),
-              title,
-              todos: [],
-            },
-          ],
-        })),
-      removeBoard: (id) =>
-        set((state) => ({
-          boards: state.boards.filter((board) => board.id !== id),
-        })),
+export const useBoardStore = create<BoardStoreType>()((set) => ({
+  boards: [] as BoardType[],
+  setBoards: (boards) => set({ boards }),
+  addBoard: (params) =>
+    set((state) => ({
+      boards: [...state.boards, params],
+    })),
+  updateBoard: ({ title, id }) =>
+    set((state) => {
+      const findBoard = state.boards.find((board) => board.id === id);
+      if (findBoard) {
+        findBoard.title = title;
+      }
+      return {
+        boards: [...state.boards],
+      };
     }),
-    {
-      name: "board-storage", // 로컬 스토리지에 저장될 키 이름
-    }
-  )
-);
+  removeBoard: (id) =>
+    set((state) => {
+      const removeBoard = state.boards.filter((board) => board.id !== id);
+      return {
+        boards: removeBoard,
+      };
+    }),
+}));

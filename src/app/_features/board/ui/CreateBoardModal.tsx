@@ -5,6 +5,7 @@ import { FormEventHandler, useEffect, useRef, useState } from "react";
 import { BoardInfoType } from "../type";
 import { changeInfo } from "@/app/_utils";
 import { useBoardStore } from "@/app/_store/boardStore";
+import boardsApis from "../apis";
 
 export default function CreateBoardModal() {
   const router = useRouter();
@@ -19,9 +20,10 @@ export default function CreateBoardModal() {
     setState: setBoardInfo,
   });
 
-  const onAddBoardHandler: FormEventHandler<HTMLFormElement> = (e) => {
+  const onAddBoardHandler: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    addBoard(boardInfo.title);
+    const response = await boardsApis.addBoard(boardInfo.title);
+    addBoard(response);
     router.back();
   };
 

@@ -1,15 +1,93 @@
-import { BoardType } from "@/app/_store/boardStore";
+import { BoardType, useBoardStore } from "@/app/_store/boardStore";
 import Todo from "../../todo/Todo";
+import EllipsisMenu from "./EllipsisMenu";
+import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { changeInfo } from "@/app/_utils";
+import { EllipsisStateType } from "../type";
+import boardsApis from "../apis";
+import { toast } from "react-toastify";
 
-export default function Board({ title, todos }: BoardType) {
-  console.log(todos);
+export default function Board({ id, title, todos }: BoardType) {
+  const editRef = useRef<HTMLInputElement>(null);
+
+  const { updateBoard } = useBoardStore();
+
+  const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisStateType>({
+    id: "",
+    isOpen: false,
+    isEdit: false,
+    isRemove: false,
+    title: "",
+  });
+
+  useEffect(() => {
+    if (ellipsisInfo.isEdit) {
+      editRef.current?.focus();
+    }
+  }, [ellipsisInfo.isEdit]);
+
+  const onToggleEllipsis = changeInfo.toggle<EllipsisStateType>({
+    setState: setEllipsisInfo,
+    key: "isOpen",
+  });
+  const onChangeTitle = changeInfo.text<EllipsisStateType>({
+    setState: setEllipsisInfo,
+  });
+
+  const onClickEditButton: KeyboardEventHandler<HTMLInputElement> = async (
+    e
+  ) => {
+    if (e.key === "Enter") {
+      try {
+        const response = await boardsApis.updateBoard({
+          id,
+          title: ellipsisInfo.title,
+        });
+        updateBoard(response);
+      } catch {
+        toast.error("Board의 길이는 1~20자여야 합니다.");
+      }
+      setEllipsisInfo((prev) => ({ ...prev, isEdit: false }));
+    }
+  };
+
   return (
     <div className="mr-2 w-[350px] min-w-[350px] flex flex-col overflow-hidden rounded-lg transition-transform duration-75 border border-gray-700">
-      <div className="flex-row gap-4 flex flex-shrink-0 p-2">
-        <h2>{title}</h2>
-        <span className="rounded-full bg-gray-200 w-5 h-5 flex justify-center items-center">
-          2
+      <div className="w-full flex-row flex flex-shrink-0 p-2">
+        <div className="flex gap-4 justify-center items-center">
+          {!ellipsisInfo.isEdit ? (
+            <h2>{title}</h2>
+          ) : (
+            <input
+              ref={editRef}
+              type="text"
+              id="title"
+              value={ellipsisInfo.title}
+              onChange={onChangeTitle}
+              onKeyDown={onClickEditButton}
+            />
+          )}
+          <span className="rounded-full bg-gray-200 w-5 h-5 flex justify-center items-center">
+            {todos.length}
+          </span>
+        </div>
+        <span className="relative ml-auto">
+          <button className="z-10 p-1 rounded-full transition-all hover:bg-gray-200">
+            <Image
+              onClick={onToggleEllipsis}
+              src={"/ellipsisIcon.svg"}
+              alt="ellipsis"
+              width={25}
+              height={25}
+            />
+          </button>
         </span>
+        <div className="relative">
+          {ellipsisInfo.isOpen && (
+            <EllipsisMenu id={id} setState={setEllipsisInfo} />
+          )}
+        </div>
       </div>
       <div className="flex flex-col p-2 border-2 border-black border-solid flex-grow">
         <Todo />

@@ -3,11 +3,20 @@
 import { useBoardStore } from "@/app/_store/boardStore";
 import Board from "../board/ui/Board";
 import Link from "next/link";
+import boardsApis from "../board/apis";
+import { useEffect } from "react";
 
 export default function Contents() {
-  const { boards } = useBoardStore();
+  const { boards, setBoards } = useBoardStore();
 
-  console.log(boards);
+  const getBoard = async () => {
+    const response = await boardsApis.getBoards();
+    setBoards(response);
+  };
+
+  useEffect(() => {
+    getBoard();
+  }, []);
 
   return (
     <div className="flex flex-col relative flex-auto h-full">
