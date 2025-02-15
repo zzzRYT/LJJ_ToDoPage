@@ -10,17 +10,22 @@ export interface BoardType {
   id: string;
   title: string;
   todos: TodoType[] | [];
+  order: number;
 }
 
-export interface BoardStoreType {
+interface State {
   boards: BoardType[];
+}
+
+interface Action {
   setBoards: (boards: BoardType[]) => void;
   addBoard: (params: BoardType) => void;
   updateBoard: ({ title, id }: Omit<BoardType, "todos">) => void;
   removeBoard: (id: string) => void;
+  switchBoard: ({ id, order }: { id: string; order: number }) => void;
 }
 
-export const useBoardStore = create<BoardStoreType>()((set) => ({
+export const useBoardStore = create<State & Action>()((set) => ({
   boards: [] as BoardType[],
   setBoards: (boards) => set({ boards }),
   addBoard: (params) =>
@@ -42,6 +47,27 @@ export const useBoardStore = create<BoardStoreType>()((set) => ({
       const removeBoard = state.boards.filter((board) => board.id !== id);
       return {
         boards: removeBoard,
+      };
+    }),
+  switchBoard: ({ id, order }) =>
+    set((state) => {
+      const startBoardIndex = state.boards.findIndex(
+        (board: { id: string }) => board.id === id
+      );
+      const endBoardIndex = state.boards.findIndex(
+        (board: { order: number }) => board.order === order
+      );
+
+      if (startBoardIndex !== -1 && endBoardIndex !== -1) {
+        const temp = state.boards[startBoardIndex];
+        state.boards[startBoardIndex] = state.boards[endBoardIndex];
+        state.boards[endBoardIndex] = temp;
+
+        state.boards[startBoardIndex].order = order;
+        state.boards[endBoardIndex].order = temp.order;
+      }
+      return {
+        boards: [...state.boards],
       };
     }),
 }));

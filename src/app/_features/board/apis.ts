@@ -28,7 +28,7 @@ const boardsApis = {
   updateBoard: async ({
     id,
     title,
-  }: Omit<BoardType, "todos">): Promise<BoardReturn> => {
+  }: Omit<BoardType, "todos" | "order">): Promise<BoardReturn> => {
     const response = await fetch(`/api/board/${id}`, {
       method: "PATCH",
       headers: {
@@ -50,6 +50,27 @@ const boardsApis = {
 
     if (!response.ok) {
       throw new Error("Failed to remove a board");
+    }
+    return response.json();
+  },
+
+  switchBoard: async ({
+    id,
+    order,
+  }: {
+    id: string;
+    order: number;
+  }): Promise<BoardReturn> => {
+    const response = await fetch(`/api/board/switch/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id, order }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to switch a board");
     }
     return response.json();
   },

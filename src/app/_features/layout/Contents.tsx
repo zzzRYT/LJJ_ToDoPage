@@ -5,13 +5,26 @@ import Board from "../board/ui/Board";
 import Link from "next/link";
 import boardsApis from "../board/apis";
 import { useEffect } from "react";
+import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
 
 export default function Contents() {
-  const { boards, setBoards } = useBoardStore();
+  const { boards, setBoards, switchBoard } = useBoardStore();
+
+  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
+    useDragAndDrop("right");
 
   const getBoard = async () => {
     const response = await boardsApis.getBoards();
     setBoards(response);
+  };
+
+  const dragEndEvent: DragEndEvent = (from, to) => {
+    if (boards.length === 1) return;
+    boardsApis.switchBoard({ id: from, order: to });
+    switchBoard({
+      id: from,
+      order: to,
+    });
   };
 
   useEffect(() => {
@@ -23,7 +36,28 @@ export default function Contents() {
       <div className="flex flex-auto flex-col overflow-y-hidden relative">
         <div className="flex-auto flex h-0 px-4 py-2 overflow-y-hidden relative">
           {boards.map((board) => {
-            return <Board key={board.id} {...board} />;
+            return (
+              <div
+                className="mr-2 w-[350px] min-w-[350px] flex flex-col overflow-hidden rounded-lg transition-transform duration-75 border border-gray-700"
+                key={board.id}
+                draggable
+                onDragStart={(e) => {
+                  onDragStart(e, { from: board.id });
+                }}
+                onDragEnter={(e) => {
+                  onDragEnter(e, { from: board.id, to: board.order });
+                }}
+                onDragEnd={(e) => {
+                  onDragEnd(e, {
+                    dragEndEvent,
+                  });
+                }}
+                onDragLeave={(e) => onDragLeave(e, { from: board.id })}
+                onDragOver={(e) => e.preventDefault()}
+              >
+                <Board {...board} />
+              </div>
+            );
           })}
           <Link
             href="/board/create"

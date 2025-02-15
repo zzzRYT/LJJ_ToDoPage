@@ -8,7 +8,7 @@ import { EllipsisStateType } from "../type";
 import boardsApis from "../apis";
 import { toast } from "react-toastify";
 
-export default function Board({ id, title, todos }: BoardType) {
+export default function Board(props: BoardType) {
   const editRef = useRef<HTMLInputElement>(null);
 
   const { updateBoard } = useBoardStore();
@@ -41,7 +41,7 @@ export default function Board({ id, title, todos }: BoardType) {
     if (e.key === "Enter") {
       try {
         const response = await boardsApis.updateBoard({
-          id,
+          id: props.id,
           title: ellipsisInfo.title,
         });
         updateBoard(response);
@@ -53,11 +53,11 @@ export default function Board({ id, title, todos }: BoardType) {
   };
 
   return (
-    <div className="mr-2 w-[350px] min-w-[350px] flex flex-col overflow-hidden rounded-lg transition-transform duration-75 border border-gray-700">
+    <>
       <div className="w-full flex-row flex flex-shrink-0 p-2">
         <div className="flex gap-4 justify-center items-center">
           {!ellipsisInfo.isEdit ? (
-            <h2>{title}</h2>
+            <h2>{props.title}</h2>
           ) : (
             <input
               ref={editRef}
@@ -69,7 +69,7 @@ export default function Board({ id, title, todos }: BoardType) {
             />
           )}
           <span className="rounded-full bg-gray-200 w-5 h-5 flex justify-center items-center">
-            {todos.length}
+            {props.todos.length}
           </span>
         </div>
         <span className="relative ml-auto">
@@ -85,7 +85,7 @@ export default function Board({ id, title, todos }: BoardType) {
         </span>
         <div className="relative">
           {ellipsisInfo.isOpen && (
-            <EllipsisMenu id={id} setState={setEllipsisInfo} />
+            <EllipsisMenu id={props.id} setState={setEllipsisInfo} />
           )}
         </div>
       </div>
@@ -99,6 +99,6 @@ export default function Board({ id, title, todos }: BoardType) {
           + Add Item
         </button>
       </div>
-    </div>
+    </>
   );
 }

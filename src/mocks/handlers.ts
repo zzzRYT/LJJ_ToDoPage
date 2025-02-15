@@ -17,6 +17,13 @@ type DeleteBoardParams = {
   id: string;
 };
 
+type SwitchBoardParams = {
+  id: string;
+};
+type SwitchBoardRequestBody = {
+  order: number;
+};
+
 export const handlers = [
   //보드 조회
   http.get("/api/boards", async () => {
@@ -43,10 +50,14 @@ export const handlers = [
     async ({ request }) => {
       const { title } = await request.json();
 
+      const curBoard = JSON.parse(
+        window.localStorage.getItem("board-storage") || "[]"
+      );
       const newBoard = {
         id: (Math.random() * 10000).toFixed().toString(),
         title: title,
         todos: [],
+        order: curBoard.length + 1,
       };
 
       if (title.length > 15) {
@@ -134,6 +145,41 @@ export const handlers = [
       return HttpResponse.json(removeBoard, {
         status: 200,
         statusText: "Deleted Successfully",
+      });
+    }
+  ),
+
+  http.patch<SwitchBoardParams, SwitchBoardRequestBody, EmptyType>(
+    "/api/board/switch/:id",
+    async ({ params, request }) => {
+      const { id } = params;
+      const { order } = await request.json();
+
+      const boards = JSON.parse(
+        window.localStorage.getItem("board-storage") || "[]"
+      );
+
+      const startBoardIndex = boards.findIndex(
+        (board: { id: string }) => board.id === id
+      );
+      const endBoardIndex = boards.findIndex(
+        (board: { order: number }) => board.order === order
+      );
+
+      if (startBoardIndex !== -1 && endBoardIndex !== -1) {
+        const temp = boards[startBoardIndex];
+        boards[startBoardIndex] = boards[endBoardIndex];
+        boards[endBoardIndex] = temp;
+
+        boards[startBoardIndex].order = order;
+        boards[endBoardIndex].order = temp.order;
+      }
+
+      window.localStorage.setItem("board-storage", JSON.stringify(boards));
+
+      return HttpResponse.json(boards, {
+        status: 200,
+        statusText: "Switched Successfully",
       });
     }
   ),
