@@ -1,37 +1,57 @@
 import { BoardType, useBoardStore } from "@/app/_store/boardStore";
-import Todo from "../../todo/Todo";
 import EllipsisMenu from "./EllipsisMenu";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { changeInfo } from "@/app/_utils";
-import { EllipsisStateType } from "../type";
 import boardsApis from "../apis";
 import { toast } from "react-toastify";
+import Todo from "../todo/ui/Todo";
+import { EllipsisBoardState } from "../type";
+import { AddTodoStateType, TodoListReturn } from "../todo/type";
+import todoApis from "../todo/apis";
+import Link from "next/link";
 
 export default function Board(props: BoardType) {
   const editRef = useRef<HTMLInputElement>(null);
+  const addTodoRef = useRef<HTMLInputElement>(null);
 
   const { updateBoard } = useBoardStore();
 
-  const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisStateType>({
+  const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisBoardState>({
     id: "",
     isOpen: false,
     isEdit: false,
     isRemove: false,
     title: "",
   });
+  const [todoList, setTodoList] = useState<TodoListReturn>();
+  const [newTodoInfo, setNewTodoInfo] = useState<AddTodoStateType>({
+    id: "",
+    todo: "",
+    isCompleted: false,
+    order: 0,
+    isAdd: false,
+  });
 
-  useEffect(() => {
-    if (ellipsisInfo.isEdit) {
-      editRef.current?.focus();
+  const getTodoList = async () => {
+    try {
+      const response = await todoApis.getTodos(props.id);
+      setTodoList(response);
+    } catch {
+      toast.error("Todo를 불러오는데 실패했습니다.");
     }
-  }, [ellipsisInfo.isEdit]);
+  };
 
-  const onToggleEllipsis = changeInfo.toggle<EllipsisStateType>({
+  const onToggleAddTodo = changeInfo.toggle<AddTodoStateType>({
+    setState: setNewTodoInfo,
+    key: "isAdd",
+  });
+
+  const onToggleEllipsis = changeInfo.toggle<EllipsisBoardState>({
     setState: setEllipsisInfo,
     key: "isOpen",
   });
-  const onChangeTitle = changeInfo.text<EllipsisStateType>({
+  const onChangeTitle = changeInfo.text<EllipsisBoardState>({
     setState: setEllipsisInfo,
   });
 
@@ -52,6 +72,21 @@ export default function Board(props: BoardType) {
     }
   };
 
+  useEffect(() => {
+    if (ellipsisInfo.isEdit) {
+      editRef.current?.focus();
+    }
+  }, [ellipsisInfo.isEdit]);
+
+  useEffect(() => {
+    if (newTodoInfo.isAdd) {
+      addTodoRef.current?.focus();
+    }
+  }, [newTodoInfo.isAdd]);
+
+  useEffect(() => {
+    getTodoList();
+  }, []);
   return (
     <>
       <div className="w-full flex-row flex flex-shrink-0 p-2">
@@ -69,7 +104,7 @@ export default function Board(props: BoardType) {
             />
           )}
           <span className="rounded-full bg-gray-200 w-5 h-5 flex justify-center items-center">
-            {props.todos.length}
+            {todoList?.todos.length}
           </span>
         </div>
         <span className="relative ml-auto">
@@ -85,19 +120,35 @@ export default function Board(props: BoardType) {
         </span>
         <div className="relative">
           {ellipsisInfo.isOpen && (
-            <EllipsisMenu id={props.id} setState={setEllipsisInfo} />
+            <EllipsisMenu
+              id={props.id}
+              setState={setEllipsisInfo}
+              state={"board"}
+            />
           )}
         </div>
       </div>
       <div className="flex flex-col p-2 border-2 border-black border-solid flex-grow">
-        <Todo />
-        <Todo />
-        <Todo />
-        <Todo />
-        <Todo />
-        <button className="flex justify-start pl-4 mt-5 transition-all rounded-lg hover:bg-gray-200">
-          + Add Item
-        </button>
+        {todoList?.todos.map((todo) => {
+          return (
+            <div key={todo.id}>
+              <Todo {...todo} />
+            </div>
+          );
+        })}
+        <Link
+          href={{
+            pathname: "/info/create",
+            query: { type: "todo", boardId: props.id },
+          }}
+        >
+          <button
+            onClick={onToggleAddTodo}
+            className="flex justify-start pl-4 mt-5 transition-all rounded-lg hover:bg-gray-200"
+          >
+            + Add Item
+          </button>
+        </Link>
       </div>
     </>
   );

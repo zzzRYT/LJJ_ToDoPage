@@ -60,7 +60,10 @@ export default function Contents() {
             );
           })}
           <Link
-            href="/board/create"
+            href={{
+              pathname: "/info/create",
+              query: { type: "board" },
+            }}
             className="w-10 text-5xl border-2 border-solid border-gray-600 flex justify-center items-center rounded-lg cursor-pointer hover:bg-gray-200"
           >
             <button>+</button>

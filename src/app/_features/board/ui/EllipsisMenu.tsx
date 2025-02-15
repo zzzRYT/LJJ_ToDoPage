@@ -1,37 +1,57 @@
 import { useBoardStore } from "@/app/_store/boardStore";
 import { Dispatch, SetStateAction } from "react";
 import boardsApis from "../apis";
-import { EllipsisStateType } from "../type";
 import { changeInfo } from "@/app/_utils";
 import { toast } from "react-toastify";
 
-interface EllipsisMenuProps {
+interface EllipsisMenuProps<T> {
   id: string;
-  setState: Dispatch<SetStateAction<EllipsisStateType>>;
+  setState: Dispatch<SetStateAction<T>>;
+  state: "board" | "todo";
 }
 
-export default function EllipsisMenu({ id, setState }: EllipsisMenuProps) {
-  const onToggleEdit = changeInfo.toggle<EllipsisStateType>({
+export default function EllipsisMenu<T>({
+  id,
+  setState,
+  state,
+}: EllipsisMenuProps<T>) {
+  const onToggleEdit = changeInfo.toggle<T>({
     setState,
-    key: ["isEdit", "isOpen"],
+    key: ["isEdit", "isOpen"] as (keyof T)[],
   });
   const { removeBoard } = useBoardStore();
 
-  const onToggleCloseEllipsis = changeInfo.toggle<EllipsisStateType>({
+  const onToggleCloseEllipsis = changeInfo.toggle<T>({
     setState,
-    key: "isOpen",
+    key: "isOpen" as keyof T,
   });
 
-  const onRemoveBoard = async () => {
-    if (confirm("정말로 삭제하시겠습니까?")) {
-      try {
-        await boardsApis.removeBoard(id);
-        removeBoard(id);
-      } catch {
-        toast.error("보드 삭제에 실패했습니다. 다시 시도해 주세요.");
-      }
+  const callRemoveBoard = async () => {
+    try {
+      await boardsApis.removeBoard(id);
+      removeBoard(id);
+    } catch {
+      toast.error("삭제에 실패했습니다. 다시 시도해 주세요.");
     }
-    setState((prev) => ({ ...prev, isOpen: false }));
+  };
+  const callRemoveTodo = async () => {
+    try {
+      await boardsApis.removeBoard(id);
+      removeBoard(id);
+    } catch {
+      toast.error("삭제에 실패했습니다. 다시 시도해 주세요.");
+    }
+  };
+
+  const onRemoveBoard = () => {
+    if (confirm("정말로 삭제하시겠습니까?")) {
+      if (state === "board") {
+        callRemoveBoard();
+      } else {
+        callRemoveTodo();
+      }
+      setState((prev) => ({ ...prev, isOpen: false }));
+    }
   };
 
   return (

@@ -1,15 +1,8 @@
 import { create } from "zustand";
 
-export interface TodoType {
-  id: number;
-  description: string;
-  isCompleted: boolean;
-}
-
 export interface BoardType {
   id: string;
   title: string;
-  todos: TodoType[] | [];
   order: number;
 }
 
