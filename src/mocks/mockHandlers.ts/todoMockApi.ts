@@ -3,6 +3,8 @@ import {
   AddTodoRequestBody,
   DeleteTodoParams,
   EmptyType,
+  SwitchTodoParams,
+  SwitchTodoRequestBody,
   TodoFromBoardParam,
   UPdateTodoParams,
   UpdateTodoRequestBody,
@@ -39,7 +41,10 @@ export const todoHandlers = [
             id: newTodoId,
             todo: todo,
             isCompleted: false,
-            order: targetTodo.todos.length + 1,
+            order:
+              targetTodo.todos.length === 0
+                ? 1
+                : targetTodo.todos[targetTodo.todos.length - 1].order + 1,
           },
         ],
       };
@@ -117,6 +122,13 @@ export const todoHandlers = [
         status: 200,
         statusText: "Delete Successfully",
       });
+    }
+  ),
+  http.patch<SwitchTodoParams, SwitchTodoRequestBody, EmptyType>(
+    "/api/todos/switch/:boardId",
+    async ({ params, request }) => {
+      const { boardId, todoId } = params;
+      const { order } = await request.json();
     }
   ),
 ];

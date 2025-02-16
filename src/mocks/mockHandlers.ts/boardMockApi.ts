@@ -40,7 +40,8 @@ export const boardHandlers = [
       const newBoard = {
         id: (Math.random() * 10000).toFixed().toString() + "01",
         title: title,
-        order: curBoard.length + 1,
+        order:
+          curBoard.length === 0 ? 1 : curBoard[curBoard.length - 1].order + 1,
       };
 
       const curTodo = handleStorage.get("todo-storage");

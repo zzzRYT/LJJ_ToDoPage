@@ -27,3 +27,5 @@ export type AddTodoRequestBody = Pick<TodoInfoType, "todo">;
 export type UPdateTodoParams = Pick<TodoInfoType, "boardId" | "todoId">;
 export type UpdateTodoRequestBody = Pick<TodoInfoType, "todo">;
 export type DeleteTodoParams = Pick<TodoInfoType, "boardId" | "todoId">;
+export type SwitchTodoParams = Pick<TodoInfoType, "boardId" | "todoId">;
+export type SwitchTodoRequestBody = Pick<TodoInfoType, "order">;
