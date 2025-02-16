@@ -22,7 +22,7 @@ export default function CreateBoardModal() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { addBoard } = useBoardStore();
-  const { addTodo } = useTodoStore();
+  const { setTodos } = useTodoStore();
 
   const [info, setInfo] = useState<InfoStateType>({
     title: "",
@@ -47,7 +47,7 @@ export default function CreateBoardModal() {
           boardId: boardId!,
           todo: info.title,
         });
-        addTodo(boardId!, response);
+        setTodos(response);
       } catch {
         toast.error("Todo 추가에 실패했습니다. 다시 시도해 주세요.");
       }

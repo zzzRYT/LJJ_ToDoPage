@@ -1,11 +1,14 @@
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
 import { changeInfo } from "@/app/_utils";
 import EllipsisMenu from "@/app/_features/board/ui/EllipsisMenu";
 import { EllipsisTodoState } from "../../type";
-import { TodoType } from "../type";
+import { TodoProps } from "../type";
+import todoApis from "../apis";
+import { toast } from "react-toastify";
+import useTodoStore from "@/app/_store/todoStore";
 
-export default function Todo(props: TodoType) {
+export default function Todo(props: TodoProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisTodoState>({
     id: "",
@@ -16,6 +19,8 @@ export default function Todo(props: TodoType) {
     isCompleted: props.isCompleted,
   });
 
+  const { setTodos } = useTodoStore();
+
   const onChangeTodoTitle = changeInfo.text<EllipsisTodoState>({
     setState: setEllipsisInfo,
   });
@@ -23,6 +28,23 @@ export default function Todo(props: TodoType) {
     setState: setEllipsisInfo,
     key: "isOpen",
   });
+
+  const onEditTodo: KeyboardEventHandler<HTMLInputElement> = async (e) => {
+    if (e.key === "Enter") {
+      try {
+        const response = await todoApis.updateTodo({
+          boardId: props.boardId,
+          todoId: props.id,
+          todo: ellipsisInfo.todo,
+        });
+        setTodos(response);
+      } catch {
+        toast.error("Todo 수정에 실패했습니다. 다시 시도해 주세요.");
+      }
+      setEllipsisInfo((prev) => ({ ...prev, isEdit: !prev.isEdit }));
+    }
+  };
+
   useEffect(() => {
     if (ellipsisInfo.isEdit) {
       inputRef.current?.focus();
@@ -38,8 +60,9 @@ export default function Todo(props: TodoType) {
         <input
           ref={inputRef}
           value={ellipsisInfo.todo}
-          id="title"
+          id="todo"
           onChange={onChangeTodoTitle}
+          onKeyDown={onEditTodo}
         />
       )}
       <span className="relative ml-auto">
@@ -57,7 +80,12 @@ export default function Todo(props: TodoType) {
       </span>
       <div className="relative">
         {ellipsisInfo.isOpen && (
-          <EllipsisMenu id={props.id} setState={setEllipsisInfo} state="todo" />
+          <EllipsisMenu
+            id={props.boardId}
+            todoId={props.id}
+            setState={setEllipsisInfo}
+            state="todo"
+          />
         )}
       </div>
     </div>

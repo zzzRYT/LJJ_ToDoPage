@@ -1,5 +1,12 @@
 import { http, HttpResponse } from "msw";
-import { AddTodoRequestBody, EmptyType, TodoFromBoardParam } from "./type";
+import {
+  AddTodoRequestBody,
+  DeleteTodoParams,
+  EmptyType,
+  TodoFromBoardParam,
+  UPdateTodoParams,
+  UpdateTodoRequestBody,
+} from "./type";
 import { handleStorage } from "@/app/_utils";
 
 export const todoHandlers = [
@@ -39,9 +46,76 @@ export const todoHandlers = [
 
       handleStorage.set("todo-storage", [...updateCurTodo, newTodo]);
 
-      return HttpResponse.json(newTodo, {
+      return HttpResponse.json([...updateCurTodo, newTodo], {
         status: 200,
         statusText: "Create Successfully",
+      });
+    }
+  ),
+  http.put<UPdateTodoParams, UpdateTodoRequestBody, EmptyType>(
+    "/api/todos/:boardId/:todoId",
+    async ({ params, request }) => {
+      const { boardId, todoId } = params;
+      const { todo } = await request.json();
+
+      const curTodo = handleStorage.get("todo-storage");
+      const targetTodoList = curTodo.find(
+        (board: { boardId: string }) => board.boardId === boardId
+      );
+      const targetTodo = targetTodoList.todos.find(
+        (todo: { id: string }) => todo.id === todoId
+      );
+      console.log(curTodo, targetTodoList, targetTodo);
+      const filterTargetTodoList = targetTodoList.todos.filter(
+        (todo: { id: string }) => todo.id !== todoId
+      );
+
+      targetTodo.todo = todo;
+      const updateTodoList = {
+        ...targetTodoList,
+        todos: [...filterTargetTodoList, targetTodo],
+      };
+
+      const filterCurTodo = curTodo.filter(
+        (board: { boardId: string }) => board.boardId !== boardId
+      );
+
+      handleStorage.set("todo-storage", [...filterCurTodo, updateTodoList]);
+
+      return HttpResponse.json([...filterCurTodo, updateTodoList], {
+        status: 200,
+        statusText: "Update Successfully",
+      });
+    }
+  ),
+  http.delete<DeleteTodoParams, EmptyType, EmptyType>(
+    "/api/todos/:boardId/:todoId",
+    async ({ params }) => {
+      const { boardId, todoId } = params;
+
+      const curTodo = handleStorage.get("todo-storage");
+      const targetTodoList = curTodo.find(
+        (board: { boardId: string }) => board.boardId === boardId
+      );
+      const targetTodo = targetTodoList.todos.filter(
+        (todo: { id: string }) => todo.id !== todoId
+      );
+
+      const deleteTargetTodoInCurTodo = {
+        ...targetTodoList,
+        todos: targetTodo,
+      };
+      const filterCurTodo = curTodo.filter(
+        (board: { boardId: string }) => board.boardId !== boardId
+      );
+
+      handleStorage.set("todo-storage", [
+        ...filterCurTodo,
+        deleteTargetTodoInCurTodo,
+      ]);
+      return HttpResponse.json([...filterCurTodo, deleteTargetTodoInCurTodo], {
+        status: 200,
+        statusText: "Delete Successfully",
       });
     }
   ),

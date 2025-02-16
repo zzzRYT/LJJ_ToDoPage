@@ -17,7 +17,7 @@ export default function Board(props: BoardType) {
   const addTodoRef = useRef<HTMLInputElement>(null);
 
   const { updateBoard } = useBoardStore();
-  const { setTodos, getTodo, addTodo } = useTodoStore();
+  const { setTodos, getTodo } = useTodoStore();
 
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisBoardState>({
     id: "",
@@ -85,7 +85,7 @@ export default function Board(props: BoardType) {
 
   useEffect(() => {
     getTodoListApi();
-  }, [addTodo]);
+  }, [setTodos]);
 
   return (
     <>
@@ -130,24 +130,24 @@ export default function Board(props: BoardType) {
       </div>
       <div className="flex flex-col p-2 border-2 border-black border-solid flex-grow">
         {getTodo(props.id)?.todos.map((todo) => {
+          const propsData = {
+            ...todo,
+            boardId: props.id,
+          };
           return (
             <div key={todo.id}>
-              <Todo {...todo} />
+              <Todo {...propsData} />
             </div>
           );
         })}
         <Link
+          className="flex justify-start pl-4 mt-5 transition-all rounded-lg hover:bg-gray-200"
           href={{
             pathname: "/info/create",
             query: { type: "todo", boardId: props.id },
           }}
         >
-          <button
-            onClick={onToggleAddTodo}
-            className="flex justify-start pl-4 mt-5 transition-all rounded-lg hover:bg-gray-200"
-          >
-            + Add Item
-          </button>
+          <button onClick={onToggleAddTodo}>+ Add Item</button>
         </Link>
       </div>
     </>

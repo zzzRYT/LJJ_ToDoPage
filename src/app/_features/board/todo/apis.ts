@@ -15,7 +15,7 @@ const todoApis = {
   }: {
     boardId: string;
     todo: string;
-  }): Promise<TodoFromBoard> => {
+  }): Promise<TodoFromBoard[]> => {
     const response = await fetch(`/api/todos/${boardId}`, {
       method: "POST",
       headers: {
@@ -26,6 +26,42 @@ const todoApis = {
 
     if (!response.ok) {
       throw new Error("Failed to add a new todo");
+    }
+    return response.json();
+  },
+  updateTodo: async ({
+    boardId,
+    todoId,
+    todo,
+  }: {
+    boardId: string;
+    todoId: string;
+    todo: string;
+  }): Promise<TodoFromBoard[]> => {
+    const response = await fetch(`/api/todos/${boardId}/${todoId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ todo }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update a todo");
+    }
+    return response.json();
+  },
+  removeTodo: async ({
+    boardId,
+    todoId,
+  }: {
+    boardId: string;
+    todoId: string;
+  }): Promise<TodoFromBoard[]> => {
+    const response = await fetch(`/api/todos/${boardId}/${todoId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to remove a todo");
     }
     return response.json();
   },

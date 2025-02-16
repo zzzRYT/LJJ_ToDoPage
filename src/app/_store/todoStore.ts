@@ -12,9 +12,6 @@ interface State {
 interface Action {
   setTodos: (todos: TodoFromBoard[]) => void;
   getTodo: (boardId: string) => TodoFromBoard;
-  addTodo: (boardId: string, todo: TodoFromBoard) => void;
-  updateTodo: (todo: TodoType) => void;
-  removeTodo: (todoId: string) => void;
   switchTodo: ({ todoId, order }: { todoId: string; order: number }) => void;
 }
 
@@ -27,15 +24,6 @@ const useTodoStore = create<State & Action>((set, get) => ({
     const findTodo = todos.find((todo) => todo.boardId === boardId);
     return findTodo ? findTodo : { boardId, todos: [] };
   },
-  addTodo: (boardId, todo) =>
-    set((state) => {
-      const updatedTodos = state.todos.filter((t) => t.boardId !== boardId);
-      return {
-        todos: [...updatedTodos, todo],
-      };
-    }),
-  updateTodo: (todo) => set({}),
-  removeTodo: (todoId) => set({}),
   switchTodo: ({ todoId, order }) => set({}),
 }));
 

@@ -4,7 +4,10 @@ export interface TodoType {
   isCompleted: boolean;
   order: number;
 }
-
 export interface AddTodoStateType extends TodoType {
   isAdd: boolean;
 }
+
+export type TodoProps = {
+  boardId: string;
+} & TodoType;

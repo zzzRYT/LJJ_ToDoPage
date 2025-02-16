@@ -3,9 +3,12 @@ import { Dispatch, SetStateAction } from "react";
 import boardsApis from "../apis";
 import { changeInfo } from "@/app/_utils";
 import { toast } from "react-toastify";
+import useTodoStore from "@/app/_store/todoStore";
+import todoApis from "../todo/apis";
 
 interface EllipsisMenuProps<T> {
   id: string;
+  todoId?: string;
   setState: Dispatch<SetStateAction<T>>;
   state: "board" | "todo";
 }
@@ -14,12 +17,14 @@ export default function EllipsisMenu<T>({
   id,
   setState,
   state,
+  todoId,
 }: EllipsisMenuProps<T>) {
   const onToggleEdit = changeInfo.toggle<T>({
     setState,
     key: ["isEdit", "isOpen"] as (keyof T)[],
   });
   const { removeBoard } = useBoardStore();
+  const { setTodos } = useTodoStore();
 
   const onToggleCloseEllipsis = changeInfo.toggle<T>({
     setState,
@@ -36,8 +41,11 @@ export default function EllipsisMenu<T>({
   };
   const callRemoveTodo = async () => {
     try {
-      await boardsApis.removeBoard(id);
-      removeBoard(id);
+      const response = await todoApis.removeTodo({
+        boardId: id,
+        todoId: todoId!,
+      });
+      setTodos(response);
     } catch {
       toast.error("삭제에 실패했습니다. 다시 시도해 주세요.");
     }
