@@ -3,20 +3,13 @@ import { AddTodoRequestBody, EmptyType, TodoFromBoardParam } from "./type";
 import { handleStorage } from "@/app/_utils";
 
 export const todoHandlers = [
-  http.get<TodoFromBoardParam, EmptyType, EmptyType>(
-    "/api/todos/:boardId",
-    async ({ params }) => {
-      const { boardId } = params;
-      const curTodo = handleStorage.get("todo-storage");
-      const todos = curTodo.find(
-        (board: { boardId: string }) => board.boardId === boardId
-      );
-      return HttpResponse.json(todos, {
-        status: 200,
-        statusText: "Get Successfully",
-      });
-    }
-  ),
+  http.get("/api/todos", () => {
+    const curTodo = handleStorage.get("todo-storage");
+    return HttpResponse.json(curTodo, {
+      status: 200,
+      statusText: "Get Successfully",
+    });
+  }),
   http.post<TodoFromBoardParam, AddTodoRequestBody, EmptyType>(
     "/api/todos/:boardId",
     async ({ params, request }) => {

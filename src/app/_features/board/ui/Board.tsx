@@ -7,15 +7,17 @@ import boardsApis from "../apis";
 import { toast } from "react-toastify";
 import Todo from "../todo/ui/Todo";
 import { EllipsisBoardState } from "../type";
-import { AddTodoStateType, TodoListReturn } from "../todo/type";
+import { AddTodoStateType } from "../todo/type";
 import todoApis from "../todo/apis";
 import Link from "next/link";
+import useTodoStore from "@/app/_store/todoStore";
 
 export default function Board(props: BoardType) {
   const editRef = useRef<HTMLInputElement>(null);
   const addTodoRef = useRef<HTMLInputElement>(null);
 
   const { updateBoard } = useBoardStore();
+  const { setTodos, getTodo, addTodo } = useTodoStore();
 
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisBoardState>({
     id: "",
@@ -24,7 +26,7 @@ export default function Board(props: BoardType) {
     isRemove: false,
     title: "",
   });
-  const [todoList, setTodoList] = useState<TodoListReturn>();
+
   const [newTodoInfo, setNewTodoInfo] = useState<AddTodoStateType>({
     id: "",
     todo: "",
@@ -33,10 +35,10 @@ export default function Board(props: BoardType) {
     isAdd: false,
   });
 
-  const getTodoList = async () => {
+  const getTodoListApi = async () => {
     try {
-      const response = await todoApis.getTodos(props.id);
-      setTodoList(response);
+      const response = await todoApis.getTodos();
+      setTodos(response);
     } catch {
       toast.error("Todo를 불러오는데 실패했습니다.");
     }
@@ -76,17 +78,15 @@ export default function Board(props: BoardType) {
     if (ellipsisInfo.isEdit) {
       editRef.current?.focus();
     }
-  }, [ellipsisInfo.isEdit]);
-
-  useEffect(() => {
     if (newTodoInfo.isAdd) {
       addTodoRef.current?.focus();
     }
-  }, [newTodoInfo.isAdd]);
+  }, [ellipsisInfo.isEdit, newTodoInfo.isAdd]);
 
   useEffect(() => {
-    getTodoList();
-  }, []);
+    getTodoListApi();
+  }, [addTodo]);
+
   return (
     <>
       <div className="w-full flex-row flex flex-shrink-0 p-2">
@@ -104,7 +104,7 @@ export default function Board(props: BoardType) {
             />
           )}
           <span className="rounded-full bg-gray-200 w-5 h-5 flex justify-center items-center">
-            {todoList?.todos.length}
+            {getTodo(props.id)?.todos.length}
           </span>
         </div>
         <span className="relative ml-auto">
@@ -129,7 +129,7 @@ export default function Board(props: BoardType) {
         </div>
       </div>
       <div className="flex flex-col p-2 border-2 border-black border-solid flex-grow">
-        {todoList?.todos.map((todo) => {
+        {getTodo(props.id)?.todos.map((todo) => {
           return (
             <div key={todo.id}>
               <Todo {...todo} />

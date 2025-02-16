@@ -18,7 +18,7 @@ interface Action {
   switchBoard: ({ id, order }: { id: string; order: number }) => void;
 }
 
-export const useBoardStore = create<State & Action>()((set) => ({
+export const useBoardStore = create<State & Action>((set) => ({
   boards: [] as BoardType[],
   setBoards: (boards) => set({ boards }),
   addBoard: (params) =>

@@ -1,8 +1,8 @@
-import { TodoListReturn, TodoType } from "./type";
+import { TodoFromBoard } from "@/app/_store/todoStore";
 
 const todoApis = {
-  getTodos: async (boardId: string): Promise<TodoListReturn> => {
-    const response = await fetch(`/api/todos/${boardId}`);
+  getTodos: async (): Promise<TodoFromBoard[]> => {
+    const response = await fetch(`/api/todos`);
     if (!response.ok) {
       throw new Error("Failed to fetch todos");
     }
@@ -15,7 +15,7 @@ const todoApis = {
   }: {
     boardId: string;
     todo: string;
-  }): Promise<TodoType> => {
+  }): Promise<TodoFromBoard> => {
     const response = await fetch(`/api/todos/${boardId}`, {
       method: "POST",
       headers: {
