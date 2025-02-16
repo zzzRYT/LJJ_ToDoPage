@@ -6,7 +6,7 @@ import {
   SwitchTodoParams,
   SwitchTodoRequestBody,
   TodoFromBoardParam,
-  UPdateTodoParams,
+  UpdateTodoParams,
   UpdateTodoRequestBody,
 } from "./type";
 import { handleStorage } from "@/app/_utils";
@@ -57,28 +57,42 @@ export const todoHandlers = [
       });
     }
   ),
-  http.put<UPdateTodoParams, UpdateTodoRequestBody, EmptyType>(
+  http.put<UpdateTodoParams, UpdateTodoRequestBody, EmptyType>(
     "/api/todos/:boardId/:todoId",
     async ({ params, request }) => {
       const { boardId, todoId } = params;
-      const { todo } = await request.json();
+      const { todo, isCompleted } = await request.json();
 
       const curTodo = handleStorage.get("todo-storage");
+      if (todo.trim().length < 2) {
+        return HttpResponse.json(curTodo, {
+          status: 400,
+          statusText: "Todo must be at least 2 characters",
+        });
+      }
+
+      console.log(todo);
+
       const targetTodoList = curTodo.find(
         (board: { boardId: string }) => board.boardId === boardId
       );
       const targetTodo = targetTodoList.todos.find(
         (todo: { id: string }) => todo.id === todoId
       );
-      console.log(curTodo, targetTodoList, targetTodo);
-      const filterTargetTodoList = targetTodoList.todos.filter(
-        (todo: { id: string }) => todo.id !== todoId
+      const targetTodoIndex = targetTodoList.todos.findIndex(
+        (todo: { id: string }) => todo.id === todoId
       );
 
-      targetTodo.todo = todo;
+      if (isCompleted !== undefined) {
+        targetTodo.isCompleted = isCompleted;
+      } else {
+        targetTodo.todo = todo;
+      }
+
+      targetTodoList.todos[targetTodoIndex] = targetTodo;
+
       const updateTodoList = {
         ...targetTodoList,
-        todos: [...filterTargetTodoList, targetTodo],
       };
 
       const filterCurTodo = curTodo.filter(

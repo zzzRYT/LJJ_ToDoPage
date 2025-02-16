@@ -1,6 +1,5 @@
 "use client";
 
-import { useBoardStore } from "@/app/_store/boardStore";
 import Board from "../board/ui/Board";
 import Link from "next/link";
 import boardsApis from "../board/apis";
@@ -9,6 +8,7 @@ import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
 import useTodoStore from "@/app/_store/todoStore";
 import todoApis from "../board/todo/apis";
 import { toast } from "react-toastify";
+import useBoardStore from "@/app/_store/boardStore";
 
 export default function Contents() {
   const { boards, setBoards, switchBoard } = useBoardStore();

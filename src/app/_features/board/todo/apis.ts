@@ -33,19 +33,24 @@ const todoApis = {
     boardId,
     todoId,
     todo,
+    isCompleted,
   }: {
     boardId: string;
     todoId: string;
-    todo: string;
+    todo?: string;
+    isCompleted?: boolean;
   }): Promise<TodoFromBoard[]> => {
     const response = await fetch(`/api/todos/${boardId}/${todoId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ todo }),
+      body: JSON.stringify({ todo, isCompleted }),
     });
     if (!response.ok) {
+      if (response.status === 400) {
+        throw new Error("Todo must be at least 2 characters");
+      }
       throw new Error("Failed to update a todo");
     }
     return response.json();

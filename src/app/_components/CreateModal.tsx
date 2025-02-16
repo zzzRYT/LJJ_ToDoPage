@@ -3,17 +3,17 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEventHandler, useEffect, useRef, useState } from "react";
 import { changeInfo } from "@/app/_utils";
-import { useBoardStore } from "@/app/_store/boardStore";
-import boardsApis from "../apis";
+import useBoardStore from "@/app/_store/boardStore";
+import boardsApis from "../_features/board/apis";
 import { toast } from "react-toastify";
-import todoApis from "../todo/apis";
+import todoApis from "../_features/board/todo/apis";
 import useTodoStore from "@/app/_store/todoStore";
 
 interface InfoStateType {
   title: string;
 }
 
-export default function CreateBoardModal() {
+export default function CreateModal() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -73,25 +73,16 @@ export default function CreateBoardModal() {
           <h1 className="text-2xl font-bold">
             {type === "board" ? <>Board 추가</> : <>Todo 추가</>}
           </h1>
-          {type === "board" ? (
-            <input
-              ref={inputRef}
-              value={info.title}
-              onChange={onChangeBoardName}
-              id="title"
-              className="w-full h-10 mt-5 p-2 border-2 border-black border-solid rounded-xl"
-              placeholder="보드 이름을 입력하세요"
-            />
-          ) : (
-            <input
-              ref={inputRef}
-              value={info.title}
-              onChange={onChangeBoardName}
-              id="title"
-              className="w-full h-10 mt-5 p-2 border-2 border-black border-solid rounded-xl"
-              placeholder="할 일을 입력하세요"
-            />
-          )}
+          <input
+            ref={inputRef}
+            value={info.title}
+            onChange={onChangeBoardName}
+            id="title"
+            className="w-full h-10 mt-5 p-2 border-2 border-black border-solid rounded-xl"
+            placeholder={
+              type === "board" ? "Board 이름을 입력하세요" : "Todo를 입력하세요"
+            }
+          />
           <button
             type="submit"
             className="w-full h-10 mt-5 p-2 rounded-xl bg-blue-500 text-white font-bold"

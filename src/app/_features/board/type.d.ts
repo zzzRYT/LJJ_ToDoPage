@@ -17,3 +17,8 @@ export interface EllipsisTodoState extends EllipsisStateType {
   todo: string;
   isCompleted: boolean;
 }
+
+export interface BoardUtilType {
+  title: string;
+  id: string;
+}

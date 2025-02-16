@@ -1,5 +1,5 @@
-import CreateBoardModal from "@/app/_features/board/ui/CreateBoardModal";
+import CreateModal from "@/app/_components/CreateModal";
 
-export default function BoardCreatePage() {
-  return <CreateBoardModal />;
+export default function InfoCreateModal() {
+  return <CreateModal />;
 }

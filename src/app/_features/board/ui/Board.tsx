@@ -1,49 +1,33 @@
-import { BoardType, useBoardStore } from "@/app/_store/boardStore";
-import EllipsisMenu from "./EllipsisMenu";
+import { BoardType } from "@/app/_store/boardStore";
+import EllipsisMenu from "../../../_components/EllipsisMenu";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { changeInfo } from "@/app/_utils";
-import boardsApis from "../apis";
-import { toast } from "react-toastify";
 import Todo from "../todo/ui/Todo";
 import { EllipsisBoardState } from "../type";
-import { AddTodoStateType } from "../todo/type";
 import todoApis from "../todo/apis";
 import Link from "next/link";
 import useTodoStore from "@/app/_store/todoStore";
 import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
+import { editBoardHandler, removeBoardHandler } from "../utils";
 
 export default function Board(props: BoardType) {
   const editRef = useRef<HTMLInputElement>(null);
-  const addTodoRef = useRef<HTMLInputElement>(null);
 
-  const { updateBoard } = useBoardStore();
   const { getTodo, switchTodo } = useTodoStore();
-
-  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
-    useDragAndDrop("bottom");
 
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisBoardState>({
     id: "",
     isOpen: false,
     isEdit: false,
     isRemove: false,
-    title: "",
+    title: props.title,
   });
 
-  const [newTodoInfo, setNewTodoInfo] = useState<AddTodoStateType>({
-    id: "",
-    todo: "",
-    isCompleted: false,
-    order: 0,
-    isAdd: false,
-  });
+  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
+    useDragAndDrop("bottom");
 
-  const onToggleAddTodo = changeInfo.toggle<AddTodoStateType>({
-    setState: setNewTodoInfo,
-    key: "isAdd",
-  });
-
+  //change Event
   const onToggleEllipsis = changeInfo.toggle<EllipsisBoardState>({
     setState: setEllipsisInfo,
     key: "isOpen",
@@ -51,24 +35,40 @@ export default function Board(props: BoardType) {
   const onChangeTitle = changeInfo.text<EllipsisBoardState>({
     setState: setEllipsisInfo,
   });
+  const onToggleEdit = changeInfo.toggle<EllipsisBoardState>({
+    setState: setEllipsisInfo,
+    key: "isEdit",
+  });
 
-  const onClickEditButton: KeyboardEventHandler<HTMLInputElement> = async (
-    e
-  ) => {
+  //board event
+  function handleOutside(e: MouseEvent) {
+    if (editRef?.current && !editRef.current.contains(e.target as Node)) {
+      editBoardHandler({ id: props.id, title: ellipsisInfo.title });
+      onToggleEdit();
+    }
+  }
+  useEffect(() => {
+    document.addEventListener("mousedown", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+    };
+  }, [editRef]);
+
+  const onClickEditButton: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
-      try {
-        const response = await boardsApis.updateBoard({
-          id: props.id,
-          title: ellipsisInfo.title,
-        });
-        updateBoard(response);
-      } catch {
-        toast.error("Board의 길이는 1~20자여야 합니다.");
-      }
+      editBoardHandler({ id: props.id, title: ellipsisInfo.title });
       setEllipsisInfo((prev) => ({ ...prev, isEdit: false }));
     }
   };
+  useEffect(() => {
+    if (ellipsisInfo.isEdit) {
+      editRef.current?.focus();
+    }
+  }, [ellipsisInfo.isEdit]);
 
+  const callRemoveBoard = () => removeBoardHandler({ id: props.id });
+
+  //drag event
   const dragEndEvent: DragEndEvent = (from, to) => {
     if (getTodo(props.id).todos.length === 1) return;
     todoApis.switchTodo({ todoId: from, boardId: props.id, order: to });
@@ -78,15 +78,6 @@ export default function Board(props: BoardType) {
       order: to,
     });
   };
-
-  useEffect(() => {
-    if (ellipsisInfo.isEdit) {
-      editRef.current?.focus();
-    }
-    if (newTodoInfo.isAdd) {
-      addTodoRef.current?.focus();
-    }
-  }, [ellipsisInfo.isEdit, newTodoInfo.isAdd]);
 
   return (
     <>
@@ -122,14 +113,14 @@ export default function Board(props: BoardType) {
         <div className="relative">
           {ellipsisInfo.isOpen && (
             <EllipsisMenu
-              id={props.id}
               setState={setEllipsisInfo}
-              state={"board"}
+              onRemove={callRemoveBoard}
+              focusRef={editRef}
             />
           )}
         </div>
       </div>
-      <div className="flex flex-col p-2 border-2 border-black border-solid flex-grow">
+      <div className="overflow-auto overflow-x-hidden flex flex-col p-2 border-2 border-black border-solid flex-grow">
         {getTodo(props.id)?.todos.map((todo) => {
           const propsData = {
             ...todo,
@@ -173,7 +164,7 @@ export default function Board(props: BoardType) {
             query: { type: "todo", boardId: props.id },
           }}
         >
-          <button onClick={onToggleAddTodo}>+ Add Item</button>
+          <button>+ Add Item</button>
         </Link>
       </div>
     </>
