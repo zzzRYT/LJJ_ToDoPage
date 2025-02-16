@@ -39,7 +39,7 @@ export default function CreateModal() {
         const response = await boardsApis.addBoard(info.title);
         addBoard(response);
       } catch {
-        toast.error("보드 추가에 실패했습니다. 다시 시도해 주세요.");
+        toast.error("Title은 1자 이상 15자 이하로 입력해주세요.");
       }
     } else {
       try {
@@ -49,7 +49,7 @@ export default function CreateModal() {
         });
         setTodos(response);
       } catch {
-        toast.error("Todo 추가에 실패했습니다. 다시 시도해 주세요.");
+        toast.error("Todo는 2자 이상 입력해주세요.");
       }
     }
     router.back();

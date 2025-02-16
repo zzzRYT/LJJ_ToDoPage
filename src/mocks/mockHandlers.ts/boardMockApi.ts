@@ -50,10 +50,11 @@ export const boardHandlers = [
         todos: [],
       };
 
-      if (title.length > 15) {
+      if (title.length > 15 || title.trim().length < 1) {
         return HttpResponse.json(null, {
           status: 400,
-          statusText: "Title is too long. Please check your request.",
+          statusText:
+            "Title is too short or too long. Please check your request",
         });
       }
 

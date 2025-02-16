@@ -26,6 +26,14 @@ export const todoHandlers = [
       const { todo } = await request.json();
 
       const curTodo = handleStorage.get("todo-storage");
+      if (todo.length > 15 || todo.trim().length < 2) {
+        return HttpResponse.json(null, {
+          status: 400,
+          statusText:
+            "Title is too short or too long. Please check your request.",
+        });
+      }
+
       const targetTodo = curTodo.find(
         (board: { boardId: string }) => board.boardId === boardId
       );
@@ -70,9 +78,6 @@ export const todoHandlers = [
           statusText: "Todo must be at least 2 characters",
         });
       }
-
-      console.log(todo);
-
       const targetTodoList = curTodo.find(
         (board: { boardId: string }) => board.boardId === boardId
       );

@@ -22,3 +22,6 @@ export interface BoardUtilType {
   title: string;
   id: string;
 }
+
+export type EditBoardHandlerParams = Pick<BoardUtilType, "id" | "title">;
+export type RemoveBoardHandlerParams = Pick<BoardUtilType, "id">;
