@@ -65,6 +65,27 @@ const todoApis = {
     }
     return response.json();
   },
+  switchTodo: async ({
+    todoId,
+    boardId,
+    order,
+  }: {
+    todoId: string;
+    boardId: string;
+    order: number;
+  }): Promise<TodoFromBoard[]> => {
+    const response = await fetch(`/api/todos/switch/${boardId}/${todoId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ order }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to switch a todo");
+    }
+    return response.json();
+  },
 };
 
 export default todoApis;

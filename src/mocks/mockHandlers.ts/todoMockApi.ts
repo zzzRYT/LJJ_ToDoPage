@@ -125,10 +125,42 @@ export const todoHandlers = [
     }
   ),
   http.patch<SwitchTodoParams, SwitchTodoRequestBody, EmptyType>(
-    "/api/todos/switch/:boardId",
+    "/api/todos/switch/:boardId/:todoId",
     async ({ params, request }) => {
       const { boardId, todoId } = params;
       const { order } = await request.json();
+
+      const curTodo = handleStorage.get("todo-storage");
+      const targetTodoList = curTodo.find(
+        (board: { boardId: string }) => board.boardId === boardId
+      );
+      const startTodoIndex = targetTodoList.todos.findIndex(
+        (todo: { id: string }) => todo.id === todoId
+      );
+      const endTodoIndex = targetTodoList.todos.findIndex(
+        (todo: { order: number }) => todo.order === order
+      );
+
+      if (startTodoIndex !== -1 && endTodoIndex !== -1) {
+        const temp = targetTodoList.todos[startTodoIndex];
+        targetTodoList.todos[startTodoIndex] =
+          targetTodoList.todos[endTodoIndex];
+        targetTodoList.todos[endTodoIndex] = temp;
+
+        targetTodoList.todos[startTodoIndex].order = order;
+        targetTodoList.todos[endTodoIndex].order = temp.order;
+      }
+
+      const filterCurTodo = curTodo.filter(
+        (board: { boardId: string }) => board.boardId !== boardId
+      );
+
+      handleStorage.set("todo-storage", [...filterCurTodo, targetTodoList]);
+
+      return HttpResponse.json([...filterCurTodo, targetTodoList], {
+        status: 200,
+        statusText: "Switch Successfully",
+      });
     }
   ),
 ];

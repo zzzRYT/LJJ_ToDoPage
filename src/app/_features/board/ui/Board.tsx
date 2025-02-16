@@ -11,13 +11,17 @@ import { AddTodoStateType } from "../todo/type";
 import todoApis from "../todo/apis";
 import Link from "next/link";
 import useTodoStore from "@/app/_store/todoStore";
+import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
 
 export default function Board(props: BoardType) {
   const editRef = useRef<HTMLInputElement>(null);
   const addTodoRef = useRef<HTMLInputElement>(null);
 
   const { updateBoard } = useBoardStore();
-  const { setTodos, getTodo } = useTodoStore();
+  const { getTodo, switchTodo } = useTodoStore();
+
+  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
+    useDragAndDrop("bottom");
 
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisBoardState>({
     id: "",
@@ -34,15 +38,6 @@ export default function Board(props: BoardType) {
     order: 0,
     isAdd: false,
   });
-
-  const getTodoListApi = async () => {
-    try {
-      const response = await todoApis.getTodos();
-      setTodos(response);
-    } catch {
-      toast.error("Todo를 불러오는데 실패했습니다.");
-    }
-  };
 
   const onToggleAddTodo = changeInfo.toggle<AddTodoStateType>({
     setState: setNewTodoInfo,
@@ -74,6 +69,16 @@ export default function Board(props: BoardType) {
     }
   };
 
+  const dragEndEvent: DragEndEvent = (from, to) => {
+    if (getTodo(props.id).todos.length === 1) return;
+    todoApis.switchTodo({ todoId: from, boardId: props.id, order: to });
+    switchTodo({
+      boardId: props.id,
+      todoId: from,
+      order: to,
+    });
+  };
+
   useEffect(() => {
     if (ellipsisInfo.isEdit) {
       editRef.current?.focus();
@@ -82,10 +87,6 @@ export default function Board(props: BoardType) {
       addTodoRef.current?.focus();
     }
   }, [ellipsisInfo.isEdit, newTodoInfo.isAdd]);
-
-  useEffect(() => {
-    getTodoListApi();
-  }, [setTodos]);
 
   return (
     <>
@@ -135,7 +136,32 @@ export default function Board(props: BoardType) {
             boardId: props.id,
           };
           return (
-            <div key={todo.id}>
+            <div
+              key={todo.id}
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                onDragStart(e, { from: todo.id });
+              }}
+              onDragEnter={(e) => {
+                e.stopPropagation();
+                onDragEnter(e, { from: todo.id, to: todo.order });
+              }}
+              onDragEnd={(e) => {
+                e.stopPropagation();
+                onDragEnd(e, {
+                  dragEndEvent,
+                });
+              }}
+              onDragLeave={(e) => {
+                e.stopPropagation();
+                onDragLeave(e, { from: todo.id });
+              }}
+              onDragOver={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
               <Todo {...propsData} />
             </div>
           );

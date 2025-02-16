@@ -6,9 +6,13 @@ import Link from "next/link";
 import boardsApis from "../board/apis";
 import { useEffect } from "react";
 import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
+import useTodoStore from "@/app/_store/todoStore";
+import todoApis from "../board/todo/apis";
+import { toast } from "react-toastify";
 
 export default function Contents() {
   const { boards, setBoards, switchBoard } = useBoardStore();
+  const { setTodos } = useTodoStore();
 
   const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
     useDragAndDrop("right");
@@ -16,6 +20,15 @@ export default function Contents() {
   const getBoard = async () => {
     const response = await boardsApis.getBoards();
     setBoards(response);
+  };
+
+  const getTodoListApi = async () => {
+    try {
+      const response = await todoApis.getTodos();
+      setTodos(response);
+    } catch {
+      toast.error("Todo를 불러오는데 실패했습니다.");
+    }
   };
 
   const dragEndEvent: DragEndEvent = (from, to) => {
@@ -29,6 +42,7 @@ export default function Contents() {
 
   useEffect(() => {
     getBoard();
+    getTodoListApi();
   }, []);
 
   return (
