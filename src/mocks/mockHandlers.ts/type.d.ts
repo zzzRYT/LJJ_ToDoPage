@@ -16,7 +16,7 @@ export type SwitchBoardRequestBody = Pick<BoardInfoType, "order">;
 
 type TodoInfoType = {
   boardId: string;
-  todoId: string;
+  id: string;
   todo: string;
   order: number;
   isCompleted: boolean;
@@ -25,8 +25,8 @@ type TodoInfoType = {
 //Todo Type
 export type TodoFromBoardParam = Pick<TodoInfoType, "boardId">;
 export type AddTodoRequestBody = Pick<TodoInfoType, "todo">;
-export type UpdateTodoParams = Pick<TodoInfoType, "boardId" | "todoId">;
+export type UpdateTodoParams = Pick<TodoInfoType, "id">;
 export type UpdateTodoRequestBody = Pick<TodoInfoType, "todo" | "isCompleted">;
-export type DeleteTodoParams = Pick<TodoInfoType, "boardId" | "todoId">;
-export type SwitchTodoParams = Pick<TodoInfoType, "boardId" | "todoId">;
+export type DeleteTodoParams = Pick<TodoInfoType, "id">;
+export type SwitchTodoParams = Pick<TodoInfoType, "id" | "boardId">;
 export type SwitchTodoRequestBody = Pick<TodoInfoType, "order">;

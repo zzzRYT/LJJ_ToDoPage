@@ -1,27 +1,24 @@
 import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
-import { TodoProps } from "../type";
+import { TodoType } from "../type";
 import todoApis from "../apis";
-import useTodoStore from "@/app/_store/todoStore";
 import Todo from "./Todo";
+import useTodoStore from "@/app/_store/todoStore";
 
-export default function TodoList({ boardId }: Pick<TodoProps, "boardId">) {
+export default function TodoList({ boardId }: Pick<TodoType, "boardId">) {
   const { onDragEnd, onDragEnter, onDragLeave, onDragStart } = useDragAndDrop();
 
-  const { getTodo, switchTodo } = useTodoStore();
+  const { getTodos, moveTodo } = useTodoStore();
 
   //drag event
-  const dragEndEvent: DragEndEvent = (from, to) => {
+  const dragEndEvent: DragEndEvent = (from, to, board) => {
     if (from === to.toString()) return;
-    todoApis.switchTodo({ todoId: from, boardId: boardId, order: to });
-    switchTodo({
-      boardId: boardId,
-      todoId: from,
-      order: to,
-    });
+    todoApis.moveTodo({ todoId: from, order: to, boardId: board! });
+    moveTodo({ id: from, order: to, boardId: board! });
   };
+
   return (
     <>
-      {getTodo(boardId)?.todos.map((todo) => {
+      {getTodos(boardId).map((todo) => {
         const propsData = {
           ...todo,
           boardId: boardId,
@@ -29,25 +26,31 @@ export default function TodoList({ boardId }: Pick<TodoProps, "boardId">) {
         return (
           <div
             key={todo.id}
+            alt-key={`todo-${todo.id}-${boardId}`}
             draggable
             onDragStart={(e) => {
               e.stopPropagation();
-              onDragStart(e, { from: todo.id });
+              onDragStart(e, { from: todo.id, board: todo.boardId });
             }}
             onDragEnter={(e) => {
               e.stopPropagation();
-              onDragEnter(e, { from: todo.id, to: todo.order });
+              onDragEnter(e, {
+                from: todo.id,
+                to: todo.order,
+                board: todo.boardId,
+              });
             }}
             onDragEnd={(e) => {
-              console.log("TOdo", e);
               e.stopPropagation();
+              console.log(e);
+
               onDragEnd(e, {
                 dragEndEvent,
               });
             }}
             onDragLeave={(e) => {
               e.stopPropagation();
-              onDragLeave(e, { from: todo.id });
+              onDragLeave(e, { from: todo.id, board: todo.boardId });
             }}
             onDragOver={(e) => {
               e.stopPropagation();

@@ -6,19 +6,23 @@ import {
   SwitchTodoParams,
   SwitchTodoRequestBody,
   TodoFromBoardParam,
+  TodoInfoType,
   UpdateTodoParams,
   UpdateTodoRequestBody,
 } from "./type";
 import { handleStorage } from "@/app/_utils";
 
 export const todoHandlers = [
-  http.get("/api/todos", () => {
+  //todo 조회 controller
+  http.get<TodoFromBoardParam, EmptyType, EmptyType>("/api/todos", () => {
     const curTodo = handleStorage.get("todo-storage");
+
     return HttpResponse.json(curTodo, {
       status: 200,
       statusText: "Get Successfully",
     });
   }),
+  //todo 추가 controller
   http.post<TodoFromBoardParam, AddTodoRequestBody, EmptyType>(
     "/api/todos/:boardId",
     async ({ params, request }) => {
@@ -26,6 +30,7 @@ export const todoHandlers = [
       const { todo } = await request.json();
 
       const curTodo = handleStorage.get("todo-storage");
+
       if (todo.length > 15 || todo.trim().length < 2) {
         return HttpResponse.json(null, {
           status: 400,
@@ -34,149 +39,121 @@ export const todoHandlers = [
         });
       }
 
-      const targetTodo = curTodo.find(
-        (board: { boardId: string }) => board.boardId === boardId
+      const boardTodos = curTodo.filter(
+        (t: TodoInfoType) => t.boardId === boardId
       );
-      const updateCurTodo = curTodo.filter(
-        (boardId: { boardId: string }) => boardId.boardId !== targetTodo.boardId
-      );
+      const maxOrder =
+        boardTodos.length > 0
+          ? Math.max(...boardTodos.map((t: TodoInfoType) => t.order))
+          : 0;
       const newTodoId = (Math.random() * 10000).toFixed().toString() + "02";
       const newTodo = {
-        ...targetTodo,
-        todos: [
-          ...targetTodo.todos,
-          {
-            id: newTodoId,
-            todo: todo,
-            isCompleted: false,
-            order: newTodoId,
-          },
-        ],
+        boardId: boardId,
+        id: newTodoId,
+        todo: todo,
+        isCompleted: false,
+        order: maxOrder + 1,
       };
 
-      handleStorage.set("todo-storage", [...updateCurTodo, newTodo]);
+      handleStorage.set("todo-storage", [...curTodo, newTodo]);
 
-      return HttpResponse.json([...updateCurTodo, newTodo], {
+      return HttpResponse.json(newTodo, {
         status: 200,
         statusText: "Create Successfully",
       });
     }
   ),
   http.put<UpdateTodoParams, UpdateTodoRequestBody, EmptyType>(
-    "/api/todos/:boardId/:todoId",
+    "/api/todos/:id",
     async ({ params, request }) => {
-      const { boardId, todoId } = params;
+      const { id } = params;
       const { todo, isCompleted } = await request.json();
 
       const curTodo = handleStorage.get("todo-storage");
-      if (todo && todo.trim().length < 2) {
+
+      if (todo !== undefined && todo.trim().length < 2) {
         return HttpResponse.json(curTodo, {
           status: 400,
           statusText: "Todo must be at least 2 characters",
         });
       }
-      const targetTodoList = curTodo.find(
-        (board: { boardId: string }) => board.boardId === boardId
-      );
-      const targetTodo = targetTodoList.todos.find(
-        (todo: { id: string }) => todo.id === todoId
-      );
-      const targetTodoIndex = targetTodoList.todos.findIndex(
-        (todo: { id: string }) => todo.id === todoId
-      );
-
-      if (isCompleted !== undefined) {
-        targetTodo.isCompleted = isCompleted;
-      } else {
+      const targetTodo = curTodo.find((todo: TodoInfoType) => todo.id === id);
+      if (todo) {
         targetTodo.todo = todo;
+      } else {
+        targetTodo.isCompleted = isCompleted;
       }
 
-      targetTodoList.todos[targetTodoIndex] = targetTodo;
+      handleStorage.set("todo-storage", curTodo);
 
-      const updateTodoList = {
-        ...targetTodoList,
-      };
-
-      const filterCurTodo = curTodo.filter(
-        (board: { boardId: string }) => board.boardId !== boardId
-      );
-
-      handleStorage.set("todo-storage", [...filterCurTodo, updateTodoList]);
-
-      return HttpResponse.json([...filterCurTodo, updateTodoList], {
+      return HttpResponse.json(targetTodo, {
         status: 200,
         statusText: "Update Successfully",
       });
     }
   ),
   http.delete<DeleteTodoParams, EmptyType, EmptyType>(
-    "/api/todos/:boardId/:todoId",
+    "/api/todos/:id",
     async ({ params }) => {
-      const { boardId, todoId } = params;
+      const { id } = params;
 
       const curTodo = handleStorage.get("todo-storage");
-      const targetTodoList = curTodo.find(
-        (board: { boardId: string }) => board.boardId === boardId
-      );
-      const targetTodo = targetTodoList.todos.filter(
-        (todo: { id: string }) => todo.id !== todoId
+      const targetDeletedTodo = curTodo.filter(
+        (todo: TodoInfoType) => todo.id !== id
       );
 
-      const deleteTargetTodoInCurTodo = {
-        ...targetTodoList,
-        todos: targetTodo,
-      };
-      const filterCurTodo = curTodo.filter(
-        (board: { boardId: string }) => board.boardId !== boardId
-      );
-
-      handleStorage.set("todo-storage", [
-        ...filterCurTodo,
-        deleteTargetTodoInCurTodo,
-      ]);
-      return HttpResponse.json([...filterCurTodo, deleteTargetTodoInCurTodo], {
+      handleStorage.set("todo-storage", targetDeletedTodo);
+      return HttpResponse.json(targetDeletedTodo, {
         status: 200,
         statusText: "Delete Successfully",
       });
     }
   ),
   http.patch<SwitchTodoParams, SwitchTodoRequestBody, EmptyType>(
-    "/api/todos/switch/:boardId/:todoId",
+    "/api/todos/move/:boardId/:id",
     async ({ params, request }) => {
-      const { boardId, todoId } = params;
+      const { id, boardId } = params;
       const { order } = await request.json();
 
       const curTodo = handleStorage.get("todo-storage");
-      const targetTodoList = curTodo.find(
-        (board: { boardId: string }) => board.boardId === boardId
-      );
-      const startTodoIndex = targetTodoList.todos.findIndex(
-        (todo: { id: string }) => todo.id === todoId
-      );
-      const endTodoIndex = targetTodoList.todos.findIndex(
-        (todo: { order: number }) => todo.order === order
-      );
+      const targetTodo = curTodo.find((todo: TodoInfoType) => todo.id === id);
 
-      if (startTodoIndex !== -1 && endTodoIndex !== -1) {
-        const temp = targetTodoList.todos[startTodoIndex];
-        targetTodoList.todos[startTodoIndex] =
-          targetTodoList.todos[endTodoIndex];
-        targetTodoList.todos[endTodoIndex] = temp;
-
-        targetTodoList.todos[startTodoIndex].order = order;
-        targetTodoList.todos[endTodoIndex].order = temp.order;
+      if (targetTodo.boardId !== boardId) {
+        targetTodo.boardId = boardId;
       }
 
-      const filterCurTodo = curTodo.filter(
-        (board: { boardId: string }) => board.boardId !== boardId
+      const startTodoIndex = curTodo.findIndex(
+        (todo: TodoInfoType) => todo.id === id
       );
 
-      handleStorage.set("todo-storage", [...filterCurTodo, targetTodoList]);
+      if (startTodoIndex !== -1) {
+        const [movedTodo] = curTodo.splice(startTodoIndex, 1); // startIndex 요소 제거
+        movedTodo.order = order;
 
-      return HttpResponse.json([...filterCurTodo, targetTodoList], {
-        status: 200,
-        statusText: "Switch Successfully",
-      });
+        // order 위치에 요소 삽입
+        curTodo.splice(order - 1, 0, movedTodo);
+
+        // 나머지 요소들의 order 값 업데이트
+        const boardTodos = curTodo.filter(
+          (todo: TodoInfoType) => todo.boardId === boardId
+        );
+
+        boardTodos.forEach((todo: TodoInfoType, index: number) => {
+          todo.order = index + 1;
+        });
+
+        handleStorage.set("todo-storage", curTodo);
+
+        return HttpResponse.json(curTodo, {
+          status: 200,
+          statusText: "Switch Successfully",
+        });
+      } else {
+        return HttpResponse.json(null, {
+          status: 404,
+          statusText: "Todo not found",
+        });
+      }
     }
   ),
 ];

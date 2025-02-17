@@ -3,13 +3,9 @@ import todoApis from "./apis";
 import { EditTodoHandlerParams, RemoveTodoHandlerParams } from "./type";
 import useTodoStore from "@/app/_store/todoStore";
 
-export async function removeTodoHandler({
-  todoId,
-  boardId,
-}: RemoveTodoHandlerParams) {
+export async function removeTodoHandler({ todoId }: RemoveTodoHandlerParams) {
   try {
     const response = await todoApis.removeTodo({
-      boardId: boardId,
       todoId: todoId,
     });
     useTodoStore.getState().setTodos(response);
@@ -19,19 +15,17 @@ export async function removeTodoHandler({
 }
 
 export async function editTodoHandler({
-  boardId,
   todoId,
   todo,
   isCompleted,
 }: Partial<EditTodoHandlerParams>) {
   try {
     const response = await todoApis.updateTodo({
-      boardId: boardId!,
       todoId: todoId!,
       todo,
       isCompleted,
     });
-    useTodoStore.getState().setTodos(response);
+    useTodoStore.getState().updateTodo(response);
   } catch (error: unknown) {
     if ((error as Error).message === "Todo must be at least 2 characters") {
       toast.error("Todo의 길이는 2자 이상이어야 합니다.");

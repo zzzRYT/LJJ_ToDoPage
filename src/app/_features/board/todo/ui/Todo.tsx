@@ -9,10 +9,10 @@ import {
 import { changeInfo } from "@/app/_utils";
 import EllipsisMenu from "@/app/_components/EllipsisMenu";
 import { EllipsisTodoState } from "../../type";
-import { TodoProps } from "../type";
+import { TodoType } from "../type";
 import { editTodoHandler, removeTodoHandler } from "../utils";
 
-export default function Todo(props: TodoProps) {
+export default function Todo(props: TodoType) {
   const todoRef = useRef<HTMLInputElement>(null);
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisTodoState>({
     isOpen: false,
@@ -47,6 +47,7 @@ export default function Todo(props: TodoProps) {
       editTodoHandler({
         boardId: props.boardId,
         todo: ellipsisInfo.todo,
+        isCompleted: ellipsisInfo.isCompleted,
         todoId: props.id,
       });
       setEllipsisInfo((prev) => ({ ...prev, isEdit: !prev.isEdit }));
@@ -57,6 +58,7 @@ export default function Todo(props: TodoProps) {
     editTodoHandler({
       boardId: props.boardId,
       todoId: props.id,
+      todo: ellipsisInfo.todo,
       isCompleted: !ellipsisInfo.isCompleted,
     });
     onToggleIsCompleted();
@@ -68,6 +70,7 @@ export default function Todo(props: TodoProps) {
         editTodoHandler({
           boardId: props.boardId,
           todo: ellipsisInfo.todo,
+          isCompleted: ellipsisInfo.isCompleted,
           todoId: props.id,
         });
         onToggleEdit();
