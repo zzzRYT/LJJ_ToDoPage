@@ -1,4 +1,6 @@
-import { Dispatch, SetStateAction } from "react";
+"use client";
+
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { changeInfo } from "@/app/_utils";
 
 interface EllipsisMenuProps<T> {
@@ -11,6 +13,8 @@ export default function EllipsisMenu<T>({
   setState,
   onRemove,
 }: EllipsisMenuProps<T>) {
+  const yRef = useRef<HTMLInputElement>(null);
+  const [isHalfWindow, setIsHalfWindow] = useState(false);
   const onToggleEdit = changeInfo.toggle<T>({
     setState,
     key: ["isEdit", "isOpen"] as (keyof T)[],
@@ -27,9 +31,33 @@ export default function EllipsisMenu<T>({
     }
   };
 
+  useEffect(() => {
+    const handlePositionY = () => {
+      if (yRef.current) {
+        const rect = yRef.current.getBoundingClientRect().top;
+        if (rect > 400) {
+          setIsHalfWindow(true);
+        } else {
+          setIsHalfWindow(false);
+        }
+      }
+    };
+    handlePositionY();
+    window.addEventListener("resize", handlePositionY);
+
+    return () => {
+      window.removeEventListener("resize", handlePositionY);
+    };
+  }, []);
+
   return (
     <>
-      <div className="absolute z-20 right-0 top-5 mt-2 w-48 bg-white rounded-lg shadow-lg py-1">
+      <div
+        ref={yRef}
+        className={`absolute z-20 right-0 ${
+          isHalfWindow ? "top-[-110px]" : "top-3"
+        } mt-2 w-48 bg-white rounded-lg shadow-lg py-1`}
+      >
         <button
           onClick={onToggleEdit}
           className="block w-full px-4 py-2 text-gray-800 hover:bg-gray-200"
