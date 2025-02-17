@@ -49,10 +49,7 @@ export const todoHandlers = [
             id: newTodoId,
             todo: todo,
             isCompleted: false,
-            order:
-              targetTodo.todos.length === 0
-                ? 1
-                : targetTodo.todos[targetTodo.todos.length - 1].order + 1,
+            order: newTodoId,
           },
         ],
       };
@@ -72,7 +69,7 @@ export const todoHandlers = [
       const { todo, isCompleted } = await request.json();
 
       const curTodo = handleStorage.get("todo-storage");
-      if (todo.trim().length < 2) {
+      if (todo && todo.trim().length < 2) {
         return HttpResponse.json(curTodo, {
           status: 400,
           statusText: "Todo must be at least 2 characters",
@@ -182,4 +179,6 @@ export const todoHandlers = [
       });
     }
   ),
+
+  //보드간 todo 위치 변경
 ];

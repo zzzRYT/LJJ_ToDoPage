@@ -15,7 +15,6 @@ import { editTodoHandler, removeTodoHandler } from "../utils";
 export default function Todo(props: TodoProps) {
   const todoRef = useRef<HTMLInputElement>(null);
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisTodoState>({
-    id: "",
     isOpen: false,
     isEdit: false,
     isRemove: false,

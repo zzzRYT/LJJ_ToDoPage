@@ -11,7 +11,7 @@ export async function editBoardHandler({ id, title }: EditBoardHandlerParams) {
     });
     useBoardStore.getState().updateBoard(response);
   } catch {
-    toast.error("Board의 길이는 1~20자여야 합니다.");
+    toast.error("Board의 길이는 1~15자여야 합니다.");
   }
 }
 

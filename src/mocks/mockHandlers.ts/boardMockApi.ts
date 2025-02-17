@@ -37,11 +37,11 @@ export const boardHandlers = [
       const { title } = await request.json();
 
       const curBoard = handleStorage.get("board-storage");
+      const newBoardId = (Math.random() * 10000).toFixed().toString() + "01";
       const newBoard = {
-        id: (Math.random() * 10000).toFixed().toString() + "01",
+        id: newBoardId,
         title: title,
-        order:
-          curBoard.length === 0 ? 1 : curBoard[curBoard.length - 1].order + 1,
+        order: newBoardId,
       };
 
       const curTodo = handleStorage.get("todo-storage");
@@ -81,7 +81,7 @@ export const boardHandlers = [
       const { id } = params;
       const { title } = await request.json();
 
-      if (title.length > 15 && title.trim().length > 2) {
+      if (title.length > 15 || title.length < 1) {
         return HttpResponse.json(null, {
           status: 400,
           statusText:
@@ -94,9 +94,7 @@ export const boardHandlers = [
       );
 
       const findBoard = boards.find((board: { id: string }) => board.id === id);
-      if (findBoard) {
-        findBoard.title = title;
-      }
+      findBoard.title = title;
 
       window.localStorage.setItem("board-storage", JSON.stringify(boards));
 

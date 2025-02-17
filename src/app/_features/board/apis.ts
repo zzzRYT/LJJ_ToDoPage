@@ -38,6 +38,11 @@ const boardsApis = {
     });
 
     if (!response.ok) {
+      if (response.status === 400) {
+        throw new Error(
+          "Todo must be at least 1 characters and less than 15 characters"
+        );
+      }
       throw new Error("Failed to update a board");
     }
     return response.json();
