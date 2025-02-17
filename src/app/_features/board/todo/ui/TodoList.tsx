@@ -5,8 +5,7 @@ import useTodoStore from "@/app/_store/todoStore";
 import Todo from "./Todo";
 
 export default function TodoList({ boardId }: Pick<TodoProps, "boardId">) {
-  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
-    useDragAndDrop("bottom");
+  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } = useDragAndDrop();
 
   const { getTodo, switchTodo } = useTodoStore();
 
@@ -40,6 +39,7 @@ export default function TodoList({ boardId }: Pick<TodoProps, "boardId">) {
               onDragEnter(e, { from: todo.id, to: todo.order });
             }}
             onDragEnd={(e) => {
+              console.log("TOdo", e);
               e.stopPropagation();
               onDragEnd(e, {
                 dragEndEvent,

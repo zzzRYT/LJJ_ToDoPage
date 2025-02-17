@@ -29,10 +29,7 @@ body {
 .drop-down {
   background-color: red;
 }
-.drag-over-right {
-  border-right: 5px solid #007bff !important;
-}
-.drag-over-bottom {
+.drag-over {
   border-right: 5px solid #007bff !important;
 }
 .drag-start {

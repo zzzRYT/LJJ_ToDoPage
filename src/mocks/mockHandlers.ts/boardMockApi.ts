@@ -89,15 +89,12 @@ export const boardHandlers = [
         });
       }
 
-      const boards = JSON.parse(
-        window.localStorage.getItem("board-storage") || "[]"
-      );
+      const boards = handleStorage.get("board-storage");
 
       const findBoard = boards.find((board: { id: string }) => board.id === id);
       findBoard.title = title;
 
-      window.localStorage.setItem("board-storage", JSON.stringify(boards));
-
+      handleStorage.set("board-storage", boards);
       return HttpResponse.json(findBoard, {
         status: 200,
         statusText: "Updated Successfully",
@@ -117,15 +114,19 @@ export const boardHandlers = [
         });
       }
 
-      const boards = JSON.parse(
-        window.localStorage.getItem("board-storage") || "[]"
-      );
+      const boards = handleStorage.get("board-storage");
+      const todos = handleStorage.get("todo-storage");
 
       const removeBoard = boards.filter(
         (board: { id: string }) => board.id !== id
       );
 
-      window.localStorage.setItem("board-storage", JSON.stringify(removeBoard));
+      const remoteTodoFromBoard = todos.filter(
+        ({ boardId }: { boardId: string }) => boardId !== id
+      );
+
+      handleStorage.set("board-storage", removeBoard);
+      handleStorage.set("todo-storage", remoteTodoFromBoard);
 
       return HttpResponse.json(removeBoard, {
         status: 200,
@@ -140,9 +141,7 @@ export const boardHandlers = [
       const { id } = params;
       const { order } = await request.json();
 
-      const boards = JSON.parse(
-        window.localStorage.getItem("board-storage") || "[]"
-      );
+      const boards = handleStorage.get("board-storage");
 
       const startBoardIndex = boards.findIndex(
         (board: { id: string }) => board.id === id
@@ -160,7 +159,7 @@ export const boardHandlers = [
         boards[endBoardIndex].order = temp.order;
       }
 
-      window.localStorage.setItem("board-storage", JSON.stringify(boards));
+      handleStorage.set("board-storage", boards);
 
       return HttpResponse.json(boards, {
         status: 200,

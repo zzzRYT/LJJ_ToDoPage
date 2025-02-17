@@ -179,6 +179,4 @@ export const todoHandlers = [
       });
     }
   ),
-
-  //보드간 todo 위치 변경
 ];

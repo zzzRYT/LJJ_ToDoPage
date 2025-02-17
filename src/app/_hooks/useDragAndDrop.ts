@@ -9,7 +9,7 @@ interface DragEventOptions {
   to: number;
 }
 
-const useDragAndDrop = (location: "bottom" | "right") => {
+const useDragAndDrop = () => {
   const fromRef = useRef<number | null>(null);
   const toRef = useRef<number | null>(null);
 
@@ -28,11 +28,7 @@ const useDragAndDrop = (location: "bottom" | "right") => {
     { from, to }
   ) => {
     if (fromRef.current !== Number(from)) {
-      if (location === "right") {
-        e.currentTarget.classList.add("drag-over-right");
-      } else {
-        e.currentTarget.classList.add("drag-over");
-      }
+      e.currentTarget.classList.add("drag-over-bottom");
     }
     toRef.current = to;
   };
@@ -43,11 +39,7 @@ const useDragAndDrop = (location: "bottom" | "right") => {
     { from }
   ) => {
     if (fromRef.current !== Number(from)) {
-      if (location === "right") {
-        e.currentTarget.classList.remove("drag-over-right");
-      } else {
-        e.currentTarget.classList.remove("drag-over");
-      }
+      e.currentTarget.classList.remove("drag-over-right");
     }
   };
 
@@ -60,11 +52,7 @@ const useDragAndDrop = (location: "bottom" | "right") => {
 
     if (parent) {
       parent.querySelectorAll(e.currentTarget.tagName).forEach((row) => {
-        if (location === "right") {
-          row.classList.remove("drag-over-right");
-        } else {
-          row.classList.remove("drag-over");
-        }
+        row.classList.remove("drag-over-right");
       });
     }
     e.currentTarget.classList.remove("drag-start");

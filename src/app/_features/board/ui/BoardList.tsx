@@ -26,8 +26,7 @@ export default function BoardList() {
       toast.error("Todo를 불러오는데 실패했습니다.");
     }
   };
-  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
-    useDragAndDrop("right");
+  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } = useDragAndDrop();
   const dragEndEvent: DragEndEvent = (from, to) => {
     if (from === to.toString()) return;
     boardsApis.switchBoard({ id: from, order: to });

@@ -91,6 +91,28 @@ const todoApis = {
     }
     return response.json();
   },
+
+  //다른 보드로 move
+  moveTodo: async ({
+    fromBoardId,
+    toBoardId,
+    todoId,
+  }: {
+    fromBoardId: string;
+    toBoardId: string;
+    todoId: string;
+  }): Promise<TodoFromBoard[]> => {
+    const response = await fetch(
+      `/api/todos/move/${todoId}/from/${fromBoardId}/to/${toBoardId}`,
+      {
+        method: "PATCH",
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to move a todo");
+    }
+    return response.json();
+  },
 };
 
 export default todoApis;
