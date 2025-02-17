@@ -1,7 +1,7 @@
-import { TodoFromBoard } from "@/app/_store/todoStore";
+import { TodoType } from "./type";
 
 const todoApis = {
-  getTodos: async (): Promise<TodoFromBoard[]> => {
+  getTodos: async (): Promise<TodoType[]> => {
     const response = await fetch(`/api/todos`);
     if (!response.ok) {
       throw new Error("Failed to fetch todos");
@@ -15,7 +15,7 @@ const todoApis = {
   }: {
     boardId: string;
     todo: string;
-  }): Promise<TodoFromBoard[]> => {
+  }): Promise<TodoType> => {
     const response = await fetch(`/api/todos/${boardId}`, {
       method: "POST",
       headers: {
@@ -30,17 +30,15 @@ const todoApis = {
     return response.json();
   },
   updateTodo: async ({
-    boardId,
     todoId,
     todo,
     isCompleted,
   }: {
-    boardId: string;
     todoId: string;
     todo?: string;
     isCompleted?: boolean;
-  }): Promise<TodoFromBoard[]> => {
-    const response = await fetch(`/api/todos/${boardId}/${todoId}`, {
+  }): Promise<TodoType> => {
+    const response = await fetch(`/api/todos/${todoId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -55,14 +53,8 @@ const todoApis = {
     }
     return response.json();
   },
-  removeTodo: async ({
-    boardId,
-    todoId,
-  }: {
-    boardId: string;
-    todoId: string;
-  }): Promise<TodoFromBoard[]> => {
-    const response = await fetch(`/api/todos/${boardId}/${todoId}`, {
+  removeTodo: async ({ todoId }: { todoId: string }): Promise<TodoType[]> => {
+    const response = await fetch(`/api/todos/${todoId}`, {
       method: "DELETE",
     });
     if (!response.ok) {
@@ -70,44 +62,22 @@ const todoApis = {
     }
     return response.json();
   },
-  switchTodo: async ({
+  moveTodo: async ({
     todoId,
     boardId,
     order,
   }: {
-    todoId: string;
     boardId: string;
+    todoId: string;
     order: number;
-  }): Promise<TodoFromBoard[]> => {
-    const response = await fetch(`/api/todos/switch/${boardId}/${todoId}`, {
+  }): Promise<TodoType[]> => {
+    const response = await fetch(`/api/todos/move/${boardId}/${todoId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ order }),
     });
-    if (!response.ok) {
-      throw new Error("Failed to switch a todo");
-    }
-    return response.json();
-  },
-
-  //다른 보드로 move
-  moveTodo: async ({
-    fromBoardId,
-    toBoardId,
-    todoId,
-  }: {
-    fromBoardId: string;
-    toBoardId: string;
-    todoId: string;
-  }): Promise<TodoFromBoard[]> => {
-    const response = await fetch(
-      `/api/todos/move/${todoId}/from/${fromBoardId}/to/${toBoardId}`,
-      {
-        method: "PATCH",
-      }
-    );
     if (!response.ok) {
       throw new Error("Failed to move a todo");
     }

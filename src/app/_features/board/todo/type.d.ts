@@ -1,13 +1,10 @@
 export interface TodoType {
+  boardId: string;
   id: string;
   todo: string;
   isCompleted: boolean;
   order: number;
 }
-
-export type TodoProps = {
-  boardId: string;
-} & TodoType;
 
 export interface TodoUtilType {
   todoId: string;

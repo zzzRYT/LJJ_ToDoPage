@@ -1,58 +1,53 @@
 import { create } from "zustand";
 import { TodoType } from "../_features/board/todo/type";
 
-export interface TodoFromBoard {
-  boardId: string;
+interface State {
   todos: TodoType[];
 }
-
-interface State {
-  todos: TodoFromBoard[];
-}
 interface Action {
-  setTodos: (todos: TodoFromBoard[]) => void;
-  getTodo: (boardId: string) => TodoFromBoard;
-  switchTodo: ({
+  setTodos: (todos: TodoType[]) => void;
+  getTodos: (boardId: string) => TodoType[];
+  addTodo: (todo: TodoType) => void;
+  updateTodo: (todo: TodoType) => void;
+  moveTodo: ({
     boardId,
-    todoId,
+    id,
     order,
-  }: {
-    boardId: string;
-    todoId: string;
-    order: number;
-  }) => void;
+  }: Omit<TodoType, "isCompleted" | "todo">) => void;
 }
 
 const useTodoStore = create<State & Action>((set, get) => ({
   todos: [],
   setTodos: (todos) => set({ todos }),
-  getTodo: (boardId) => {
-    const state = get();
-    const { todos } = state;
-    const findTodo = todos.find((todo) => todo.boardId === boardId);
-    return findTodo ? findTodo : { boardId, todos: [] };
-  },
-  switchTodo: ({ boardId, todoId, order }) =>
+  getTodos: (boardId) =>
+    get()
+      .todos.filter((t) => t.boardId === boardId)
+      .sort((a, b) => a.order - b.order),
+  addTodo: (todo) => set((state) => ({ todos: [...state.todos, todo] })),
+  updateTodo: (todo) =>
     set((state) => {
-      const findTodo = state.todos.find((todo) => todo.boardId === boardId);
-      if (findTodo) {
-        const startTodoIndex = findTodo.todos.findIndex(
-          (todo) => todo.id === todoId
-        );
-        const endTodoIndex = findTodo.todos.findIndex(
-          (todo) => todo.order === order
-        );
-
-        if (startTodoIndex !== -1 && endTodoIndex !== -1) {
-          const temp = findTodo.todos[startTodoIndex];
-          findTodo.todos[startTodoIndex] = findTodo.todos[endTodoIndex];
-          findTodo.todos[endTodoIndex] = temp;
-
-          findTodo.todos[startTodoIndex].order = order;
-          findTodo.todos[endTodoIndex].order = temp.order;
-        }
+      const targetTodo = state.todos.find((t) => t.id === todo.id);
+      if (!targetTodo) return { todos: state.todos };
+      targetTodo.todo = todo.todo;
+      targetTodo.isCompleted = todo.isCompleted;
+      return { todos: state.todos };
+    }),
+  moveTodo: ({ boardId, id, order }) =>
+    set((state) => {
+      const targetTodo = state.todos.find((t) => t.id === id);
+      if (!targetTodo) return { todos: state.todos };
+      if (targetTodo.boardId !== boardId) {
+        targetTodo.boardId = boardId;
       }
-      return { todos: [...state.todos] };
+      const startTodoIndex = state.todos.findIndex((t) => t.id === id);
+      if (startTodoIndex === -1) return { todos: state.todos };
+      const [movedTodo] = state.todos.splice(startTodoIndex, 1);
+      movedTodo.order = order;
+      state.todos.splice(order - 1, 0, movedTodo);
+      state.todos.forEach((t, i) => {
+        t.order = i + 1;
+      });
+      return { todos: state.todos };
     }),
 }));
 

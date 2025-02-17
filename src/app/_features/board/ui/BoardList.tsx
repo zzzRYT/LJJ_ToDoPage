@@ -1,16 +1,15 @@
 "use client";
 
 import useBoardStore from "@/app/_store/boardStore";
-import useTodoStore from "@/app/_store/todoStore";
 import boardsApis from "../apis";
-import todoApis from "../todo/apis";
-import { toast } from "react-toastify";
 import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
 import Board from "./Board";
 import { useEffect } from "react";
+import useTodoStore from "@/app/_store/todoStore";
+import todoApis from "../todo/apis";
 
 export default function BoardList() {
-  const { boards, setBoards, switchBoard } = useBoardStore();
+  const { boards, setBoards, moveBoard } = useBoardStore();
   const { setTodos } = useTodoStore();
 
   const getBoard = async () => {
@@ -19,18 +18,15 @@ export default function BoardList() {
   };
 
   const getTodoListApi = async () => {
-    try {
-      const response = await todoApis.getTodos();
-      setTodos(response);
-    } catch {
-      toast.error("Todo를 불러오는데 실패했습니다.");
-    }
+    const response = await todoApis.getTodos();
+    setTodos(response);
   };
+
   const { onDragEnd, onDragEnter, onDragLeave, onDragStart } = useDragAndDrop();
   const dragEndEvent: DragEndEvent = (from, to) => {
     if (from === to.toString()) return;
     boardsApis.switchBoard({ id: from, order: to });
-    switchBoard({
+    moveBoard({
       id: from,
       order: to,
     });
@@ -49,17 +45,23 @@ export default function BoardList() {
             key={board.id}
             draggable
             onDragStart={(e) => {
-              onDragStart(e, { from: board.id });
+              onDragStart(e, { from: board.id, board: board.id });
             }}
             onDragEnter={(e) => {
-              onDragEnter(e, { from: board.id, to: board.order });
+              onDragEnter(e, {
+                from: board.id,
+                to: board.order,
+                board: board.id,
+              });
             }}
             onDragEnd={(e) => {
               onDragEnd(e, {
                 dragEndEvent,
               });
             }}
-            onDragLeave={(e) => onDragLeave(e, { from: board.id })}
+            onDragLeave={(e) =>
+              onDragLeave(e, { from: board.id, board: board.id })
+            }
             onDragOver={(e) => e.preventDefault()}
           >
             <Board {...board} />

@@ -22,7 +22,7 @@ export default function CreateModal() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { addBoard } = useBoardStore();
-  const { setTodos } = useTodoStore();
+  const { addTodo } = useTodoStore();
 
   const [info, setInfo] = useState<InfoStateType>({
     title: "",
@@ -47,7 +47,7 @@ export default function CreateModal() {
           boardId: boardId!,
           todo: info.title,
         });
-        setTodos(response);
+        addTodo(response);
       } catch {
         toast.error("Todo는 2자 이상 입력해주세요.");
       }

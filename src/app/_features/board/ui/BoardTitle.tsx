@@ -14,7 +14,7 @@ import EllipsisMenu from "@/app/_components/EllipsisMenu";
 
 export default function BoardTitle({ title, id }: BoardTitleProps) {
   const editRef = useRef<HTMLInputElement>(null);
-  const { getTodo } = useTodoStore();
+  const { todos } = useTodoStore();
 
   const [ellipsisInfo, setEllipsisInfo] = useState<EllipsisBoardState>({
     isOpen: false,
@@ -85,7 +85,7 @@ export default function BoardTitle({ title, id }: BoardTitleProps) {
           />
         )}
         <span className="rounded-full bg-gray-200 w-5 h-5 flex justify-center items-center">
-          {getTodo(id)?.todos.length}
+          {todos.length}
         </span>
       </div>
       <span className="relative ml-auto">

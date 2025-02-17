@@ -15,7 +15,7 @@ interface Action {
   addBoard: (params: BoardType) => void;
   updateBoard: ({ title, id }: Omit<BoardType, "todos">) => void;
   removeBoard: (id: string) => void;
-  switchBoard: ({ id, order }: { id: string; order: number }) => void;
+  moveBoard: ({ id, order }: { id: string; order: number }) => void;
 }
 
 const useBoardStore = create<State & Action>((set) => ({
@@ -42,26 +42,19 @@ const useBoardStore = create<State & Action>((set) => ({
         boards: removeBoard,
       };
     }),
-  switchBoard: ({ id, order }) =>
+  moveBoard: ({ id, order }) =>
     set((state) => {
       const startBoardIndex = state.boards.findIndex(
-        (board: { id: string }) => board.id === id
+        (board) => board.id === id
       );
-      const endBoardIndex = state.boards.findIndex(
-        (board: { order: number }) => board.order === order
-      );
-
-      if (startBoardIndex !== -1 && endBoardIndex !== -1) {
-        const temp = state.boards[startBoardIndex];
-        state.boards[startBoardIndex] = state.boards[endBoardIndex];
-        state.boards[endBoardIndex] = temp;
-
-        state.boards[startBoardIndex].order = order;
-        state.boards[endBoardIndex].order = temp.order;
-      }
-      return {
-        boards: [...state.boards],
-      };
+      if (startBoardIndex === -1) return { boards: state.boards };
+      const [movedBoard] = state.boards.splice(startBoardIndex, 1);
+      movedBoard.order = order;
+      state.boards.splice(order - 1, 0, movedBoard);
+      state.boards.forEach((board, i) => {
+        board.order = i + 1;
+      });
+      return { boards: state.boards };
     }),
 }));
 

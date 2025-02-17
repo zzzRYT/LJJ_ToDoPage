@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import {
   AddBoardRequestBody,
+  BoardInfoType,
   DeleteBoardParams,
   EditBoardParams,
   EditBoardRequestBody,
@@ -37,17 +38,15 @@ export const boardHandlers = [
       const { title } = await request.json();
 
       const curBoard = handleStorage.get("board-storage");
+      const maxOrder =
+        curBoard.length > 0
+          ? Math.max(...curBoard.map((b: BoardInfoType) => b.order))
+          : 0;
       const newBoardId = (Math.random() * 10000).toFixed().toString() + "01";
       const newBoard = {
         id: newBoardId,
         title: title,
-        order: newBoardId,
-      };
-
-      const curTodo = handleStorage.get("todo-storage");
-      const newTodo = {
-        boardId: newBoard.id,
-        todos: [],
+        order: maxOrder + 1,
       };
 
       if (title.length > 15 || title.trim().length < 1) {
@@ -59,7 +58,6 @@ export const boardHandlers = [
       }
 
       handleStorage.set("board-storage", [...curBoard, newBoard]);
-      handleStorage.set("todo-storage", [...curTodo, newTodo]);
 
       if (!title || title === undefined || title === "") {
         return HttpResponse.json(null, {
@@ -146,25 +144,31 @@ export const boardHandlers = [
       const startBoardIndex = boards.findIndex(
         (board: { id: string }) => board.id === id
       );
-      const endBoardIndex = boards.findIndex(
-        (board: { order: number }) => board.order === order
-      );
 
-      if (startBoardIndex !== -1 && endBoardIndex !== -1) {
-        const temp = boards[startBoardIndex];
-        boards[startBoardIndex] = boards[endBoardIndex];
-        boards[endBoardIndex] = temp;
+      if (startBoardIndex !== -1) {
+        const [movedBoard] = boards.splice(startBoardIndex, 1); // startIndex 요소 제거
+        movedBoard.order = order;
 
-        boards[startBoardIndex].order = order;
-        boards[endBoardIndex].order = temp.order;
+        // order 위치에 요소 삽입
+        boards.splice(order - 1, 0, movedBoard);
+
+        // 나머지 요소들의 order 값 업데이트
+        boards.forEach((board: BoardInfoType, index: number) => {
+          board.order = index + 1;
+        });
+
+        handleStorage.set("board-storage", boards);
+
+        return HttpResponse.json(boards, {
+          status: 200,
+          statusText: "Switched Successfully",
+        });
+      } else {
+        return HttpResponse.json(null, {
+          status: 404,
+          statusText: "Board not found",
+        });
       }
-
-      handleStorage.set("board-storage", boards);
-
-      return HttpResponse.json(boards, {
-        status: 200,
-        statusText: "Switched Successfully",
-      });
     }
   ),
 ];
