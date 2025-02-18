@@ -42,27 +42,25 @@ export default function Todo(props: TodoType) {
 
   //todo 삭제
   const callRemoveTodo = () =>
-    removeTodoHandler({ todoId: props.id, boardId: props.boardId });
+    removeTodoHandler({ id: props.id, boardId: props.boardId });
 
-  //todo 완료
-  const onEditIsCompleted = async () => {
+  //todo 수정 - 완료
+  const onEditIsCompleted = () => {
     editTodoHandler({
-      boardId: props.boardId,
-      todoId: props.id,
+      id: props.id,
       todo: ellipsisInfo.todo,
       isCompleted: !ellipsisInfo.isCompleted,
     });
     onToggleIsCompleted();
   };
 
-  //todo 수정
+  //todo 수정 - 텍스트
   const onEditTodo: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
       editTodoHandler({
-        boardId: props.boardId,
         todo: ellipsisInfo.todo,
         isCompleted: ellipsisInfo.isCompleted,
-        todoId: props.id,
+        id: props.id,
       });
       onToggleEdit();
     }
@@ -72,10 +70,9 @@ export default function Todo(props: TodoType) {
     (e: MouseEvent) => {
       if (todoRef?.current && !todoRef.current.contains(e.target as Node)) {
         editTodoHandler({
-          boardId: props.boardId,
           todo: ellipsisInfo.todo,
           isCompleted: ellipsisInfo.isCompleted,
-          todoId: props.id,
+          id: props.id,
         });
         onToggleEdit();
       }

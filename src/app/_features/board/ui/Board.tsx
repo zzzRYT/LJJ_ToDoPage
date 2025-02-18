@@ -1,8 +1,8 @@
-import { BoardType } from "@/app/_store/boardStore";
 import Link from "next/link";
 import TodoList from "../todo/ui/TodoList";
 import BoardTitle from "./BoardTitle";
 import React from "react";
+import { BoardType } from "../type";
 
 const Board = (props: BoardType) => {
   return (

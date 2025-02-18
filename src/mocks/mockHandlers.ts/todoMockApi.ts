@@ -72,10 +72,10 @@ export const todoHandlers = [
 
       const curTodo = handleStorage.get("todo-storage");
 
-      if (todo !== undefined && todo.trim().length < 2) {
+      if (todo !== undefined && todo.trim().length < 1) {
         return HttpResponse.json(curTodo, {
           status: 400,
-          statusText: "Todo must be at least 2 characters",
+          statusText: "Todo must be at least 1 characters",
         });
       }
       const targetTodo = curTodo.find((todo: TodoInfoType) => todo.id === id);

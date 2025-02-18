@@ -1,10 +1,5 @@
 import { create } from "zustand";
-
-export interface BoardType {
-  id: string;
-  title: string;
-  order: number;
-}
+import { BoardType } from "../_features/board/type";
 
 interface State {
   boards: BoardType[];
@@ -13,7 +8,7 @@ interface State {
 interface Action {
   setBoards: (boards: BoardType[]) => void;
   addBoard: (params: BoardType) => void;
-  updateBoard: ({ title, id }: Omit<BoardType, "todos">) => void;
+  updateBoard: ({ title, id }: Omit<BoardType, "order">) => void;
   removeBoard: (id: string) => void;
   moveBoard: ({ id, order }: { id: string; order: number }) => void;
 }

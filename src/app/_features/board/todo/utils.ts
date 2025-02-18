@@ -1,36 +1,23 @@
-import { toast } from "react-toastify";
 import todoApis from "./apis";
 import { EditTodoHandlerParams, RemoveTodoHandlerParams } from "./type";
 import useTodoStore from "@/app/_store/todoStore";
 
-export async function removeTodoHandler({ todoId }: RemoveTodoHandlerParams) {
-  try {
-    const response = await todoApis.removeTodo({
-      todoId: todoId,
-    });
-    useTodoStore.getState().setTodos(response);
-  } catch {
-    toast.error("삭제에 실패했습니다. 다시 시도해 주세요.");
-  }
+export async function removeTodoHandler({ id }: RemoveTodoHandlerParams) {
+  const response = await todoApis.removeTodo({
+    id,
+  });
+  useTodoStore.getState().setTodos(response);
 }
 
 export async function editTodoHandler({
-  todoId,
+  id,
   todo,
   isCompleted,
-}: Partial<EditTodoHandlerParams>) {
-  try {
-    const response = await todoApis.updateTodo({
-      todoId: todoId!,
-      todo,
-      isCompleted,
-    });
-    useTodoStore.getState().updateTodo(response);
-  } catch (error: unknown) {
-    if ((error as Error).message === "Todo must be at least 1 characters") {
-      toast.error("Todo의 길이는 1자 이상이어야 합니다.");
-    } else {
-      toast.error("Todo 수정에 실패했습니다. 다시 시도해 주세요.");
-    }
-  }
+}: EditTodoHandlerParams) {
+  const response = await todoApis.updateTodo({
+    id,
+    todo,
+    isCompleted,
+  });
+  useTodoStore.getState().updateTodo(response);
 }

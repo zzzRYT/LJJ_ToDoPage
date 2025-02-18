@@ -32,6 +32,7 @@ export default function BoardTitle({ title, id }: BoardTitleProps) {
     setState: setEllipsisInfo,
   });
 
+  //보드 수정
   const onClickEditButton: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
       editBoardHandler({ id: id, title: ellipsisInfo.title });
@@ -39,7 +40,8 @@ export default function BoardTitle({ title, id }: BoardTitleProps) {
     }
   };
 
-  const callRemoveBoard = () => removeBoardHandler({ id: id });
+  //보드 삭제
+  const onClickRemoveHandler = () => removeBoardHandler({ id: id });
 
   const onToggleEdit = changeInfo.toggle<EllipsisBoardState>({
     setState: setEllipsisInfo,
@@ -54,7 +56,7 @@ export default function BoardTitle({ title, id }: BoardTitleProps) {
         onToggleEdit();
       }
     },
-    [editBoardHandler, onToggleEdit, ellipsisInfo.title]
+    [editBoardHandler, onToggleEdit]
   );
   useEffect(() => {
     document.addEventListener("mousedown", handleOutside);
@@ -103,7 +105,7 @@ export default function BoardTitle({ title, id }: BoardTitleProps) {
         {ellipsisInfo.isOpen && (
           <EllipsisMenu
             setState={setEllipsisInfo}
-            onRemove={callRemoveBoard}
+            onRemove={onClickRemoveHandler}
             focusRef={editRef}
           />
         )}

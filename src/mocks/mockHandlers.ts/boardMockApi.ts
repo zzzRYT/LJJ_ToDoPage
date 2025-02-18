@@ -115,6 +115,10 @@ export const boardHandlers = [
       const boards = handleStorage.get("board-storage");
       const todos = handleStorage.get("todo-storage");
 
+      const targetBoard = boards.find(
+        (board: BoardInfoType) => board.id === id
+      );
+
       const removeBoard = boards.filter(
         (board: { id: string }) => board.id !== id
       );
@@ -126,7 +130,7 @@ export const boardHandlers = [
       handleStorage.set("board-storage", removeBoard);
       handleStorage.set("todo-storage", remoteTodoFromBoard);
 
-      return HttpResponse.json(removeBoard, {
+      return HttpResponse.json(targetBoard, {
         status: 200,
         statusText: "Deleted Successfully",
       });

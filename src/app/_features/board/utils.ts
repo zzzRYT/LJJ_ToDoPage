@@ -1,30 +1,21 @@
 import boardsApis from "./apis";
 import useBoardStore from "@/app/_store/boardStore";
 import { EditBoardHandlerParams, RemoveBoardHandlerParams } from "./type";
-import { toast } from "react-toastify";
 import useTodoStore from "@/app/_store/todoStore";
 import todoApis from "./todo/apis";
 import { DropResult } from "@hello-pangea/dnd";
 
 export async function editBoardHandler({ id, title }: EditBoardHandlerParams) {
-  try {
-    const response = await boardsApis.updateBoard({
-      id,
-      title,
-    });
-    useBoardStore.getState().updateBoard(response);
-  } catch {
-    toast.error("Board의 길이는 1~15자여야 합니다.");
-  }
+  const response = await boardsApis.updateBoard({
+    id,
+    title,
+  });
+  useBoardStore.getState().updateBoard(response);
 }
 
 export async function removeBoardHandler({ id }: RemoveBoardHandlerParams) {
-  try {
-    await boardsApis.removeBoard(id);
-    useBoardStore.getState().removeBoard(id);
-  } catch {
-    toast.error("삭제에 실패했습니다. 다시 시도해 주세요.");
-  }
+  const response = await boardsApis.removeBoard({ id });
+  useBoardStore.getState().removeBoard(response.id);
 }
 
 export const handleDragEnd = (result: DropResult) => {

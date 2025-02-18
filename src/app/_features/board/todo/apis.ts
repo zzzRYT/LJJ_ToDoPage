@@ -1,21 +1,23 @@
-import { TodoType } from "./type";
+import { toast } from "react-toastify";
+import {
+  AddTodoParams,
+  EditTodoParams,
+  moveTodoBetweenBoardsParams,
+  MoveTodoInBoardParams,
+  RemoveTodoParams,
+  TodoType,
+} from "./type";
 
 const todoApis = {
   getTodos: async (): Promise<TodoType[]> => {
     const response = await fetch(`/api/todos`);
     if (!response.ok) {
-      throw new Error("Failed to fetch todos");
+      toast.error("데이터를 불러오는데 실패했습니다. 다시 시도해 주세요.");
     }
     return response.json();
   },
 
-  addTodo: async ({
-    boardId,
-    todo,
-  }: {
-    boardId: string;
-    todo: string;
-  }): Promise<TodoType> => {
+  addTodo: async ({ boardId, todo }: AddTodoParams): Promise<TodoType> => {
     const response = await fetch(`/api/todos/${boardId}`, {
       method: "POST",
       headers: {
@@ -25,20 +27,16 @@ const todoApis = {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to add a new todo");
+      toast.error("추가에 실패했습니다. 다시 시도해 주세요.");
     }
     return response.json();
   },
   updateTodo: async ({
-    todoId,
+    id,
     todo,
     isCompleted,
-  }: {
-    todoId: string;
-    todo?: string;
-    isCompleted?: boolean;
-  }): Promise<TodoType> => {
-    const response = await fetch(`/api/todos/${todoId}`, {
+  }: EditTodoParams): Promise<TodoType> => {
+    const response = await fetch(`/api/todos/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -47,18 +45,17 @@ const todoApis = {
     });
     if (!response.ok) {
       if (response.status === 400) {
-        throw new Error("Todo must be at least 2 characters");
+        toast.error("Todo의 길이는 1자 이상이어야 합니다.");
       }
-      throw new Error("Failed to update a todo");
     }
     return response.json();
   },
-  removeTodo: async ({ todoId }: { todoId: string }): Promise<TodoType[]> => {
-    const response = await fetch(`/api/todos/${todoId}`, {
+  removeTodo: async ({ id }: RemoveTodoParams): Promise<TodoType[]> => {
+    const response = await fetch(`/api/todos/${id}`, {
       method: "DELETE",
     });
     if (!response.ok) {
-      throw new Error("Failed to remove a todo");
+      toast.error("삭제에 실패했습니다. 다시 시도해 주세요.");
     }
     return response.json();
   },
@@ -66,11 +63,7 @@ const todoApis = {
     sourceBoardId,
     sourceIndex,
     destinationIndex,
-  }: {
-    sourceBoardId: string;
-    sourceIndex: number;
-    destinationIndex: number;
-  }): Promise<TodoType[]> => {
+  }: MoveTodoInBoardParams): Promise<TodoType[]> => {
     const response = await fetch(`/api/todos/move/${sourceBoardId}`, {
       method: "PATCH",
       headers: {
@@ -79,7 +72,7 @@ const todoApis = {
       body: JSON.stringify({ sourceIndex, destinationIndex }),
     });
     if (!response.ok) {
-      throw new Error("Failed to move a todo");
+      toast.error("위치 이동을 실패했습니다. 다시 시도해 주세요.");
     }
     return response.json();
   },
@@ -88,12 +81,7 @@ const todoApis = {
     destinationIndex,
     sourceBoardId,
     sourceIndex,
-  }: {
-    sourceBoardId: string;
-    destinationBoardId: string;
-    sourceIndex: number;
-    destinationIndex: number;
-  }): Promise<TodoType[]> => {
+  }: moveTodoBetweenBoardsParams): Promise<TodoType[]> => {
     const response = await fetch(
       `/api/todos/move/${sourceBoardId}/${destinationBoardId}`,
       {
@@ -105,7 +93,7 @@ const todoApis = {
       }
     );
     if (!response.ok) {
-      throw new Error("Failed to move a todo");
+      toast.error("위치 이동을 실패했습니다. 다시 시도해 주세요.");
     }
     return response.json();
   },
