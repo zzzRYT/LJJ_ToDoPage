@@ -22,6 +22,7 @@ export default function Todo(props: TodoType) {
     isCompleted: props.isCompleted,
   });
 
+  //change event
   const onChangeTodoTitle = changeInfo.text<EllipsisTodoState>({
     setState: setEllipsisInfo,
   });
@@ -39,21 +40,11 @@ export default function Todo(props: TodoType) {
     key: "isCompleted",
   });
 
+  //todo 삭제
   const callRemoveTodo = () =>
     removeTodoHandler({ todoId: props.id, boardId: props.boardId });
 
-  const onEditTodo: KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === "Enter") {
-      editTodoHandler({
-        boardId: props.boardId,
-        todo: ellipsisInfo.todo,
-        isCompleted: ellipsisInfo.isCompleted,
-        todoId: props.id,
-      });
-      setEllipsisInfo((prev) => ({ ...prev, isEdit: !prev.isEdit }));
-    }
-  };
-
+  //todo 완료
   const onEditIsCompleted = async () => {
     editTodoHandler({
       boardId: props.boardId,
@@ -62,6 +53,19 @@ export default function Todo(props: TodoType) {
       isCompleted: !ellipsisInfo.isCompleted,
     });
     onToggleIsCompleted();
+  };
+
+  //todo 수정
+  const onEditTodo: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === "Enter") {
+      editTodoHandler({
+        boardId: props.boardId,
+        todo: ellipsisInfo.todo,
+        isCompleted: ellipsisInfo.isCompleted,
+        todoId: props.id,
+      });
+      onToggleEdit();
+    }
   };
 
   const handleOutside = useCallback(
@@ -78,7 +82,7 @@ export default function Todo(props: TodoType) {
     },
     [editTodoHandler, onToggleEdit]
   );
-  //input 외 클릭시 input close
+  //input 외부 클릭시 input close
   useEffect(() => {
     document.addEventListener("mousedown", handleOutside);
     return () => {

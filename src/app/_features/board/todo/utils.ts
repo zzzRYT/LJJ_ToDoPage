@@ -27,8 +27,8 @@ export async function editTodoHandler({
     });
     useTodoStore.getState().updateTodo(response);
   } catch (error: unknown) {
-    if ((error as Error).message === "Todo must be at least 2 characters") {
-      toast.error("Todo의 길이는 2자 이상이어야 합니다.");
+    if ((error as Error).message === "Todo must be at least 1 characters") {
+      toast.error("Todo의 길이는 1자 이상이어야 합니다.");
     } else {
       toast.error("Todo 수정에 실패했습니다. 다시 시도해 주세요.");
     }
