@@ -5,6 +5,7 @@ import {
   DraggableContainer,
   DroppableContainer,
 } from "@/app/_components/DragContainer";
+import Link from "next/link";
 
 interface TodoListProps {
   boardId: TodoType["boardId"];
@@ -18,7 +19,7 @@ export default function TodoList({ boardId }: TodoListProps) {
     <DroppableContainer
       droppableId={boardId}
       type="TODO"
-      className="todo-list"
+      className="todo-list h-full"
       direction="vertical"
     >
       {todos.length !== 0 ? (
@@ -33,9 +34,15 @@ export default function TodoList({ boardId }: TodoListProps) {
           </DraggableContainer>
         ))
       ) : (
-        <div className="text-center mt-2 h-80 text-gray-400">
-          할 일이 없습니다.
-        </div>
+        <Link
+          className="mt-2 flex justify-center text-gray-400"
+          href={{
+            pathname: "/info/create",
+            query: { type: "todo", boardId: boardId },
+          }}
+        >
+          <button>할 일이 없습니다.</button>
+        </Link>
       )}
     </DroppableContainer>
   );
