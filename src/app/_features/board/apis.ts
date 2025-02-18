@@ -59,7 +59,7 @@ const boardsApis = {
     return response.json();
   },
 
-  switchBoard: async ({
+  moveBoard: async ({
     id,
     order,
   }: {
