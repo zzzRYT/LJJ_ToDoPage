@@ -33,11 +33,10 @@ export const todoHandlers = [
 
       const curTodo = handleStorage.get("todo-storage");
 
-      if (todo.length > 15 || todo.trim().length < 2) {
+      if (todo.trim().length < 2) {
         return HttpResponse.json(null, {
           status: 400,
-          statusText:
-            "Title is too short or too long. Please check your request.",
+          statusText: "Title is too short Please check your request.",
         });
       }
 

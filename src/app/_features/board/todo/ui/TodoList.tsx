@@ -1,7 +1,10 @@
-import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { TodoType } from "../type";
 import useTodoStore from "@/app/_store/todoStore";
 import Todo from "./Todo";
+import {
+  DraggableContainer,
+  DroppableContainer,
+} from "@/app/_components/DragContainer";
 
 interface TodoListProps {
   boardId: TodoType["boardId"];
@@ -12,30 +15,22 @@ export default function TodoList({ boardId }: TodoListProps) {
   const todos = getTodos(boardId);
 
   return (
-    <Droppable droppableId={boardId} type="TODO">
-      {(provided) => (
-        <div
-          className="todo-list"
-          ref={provided.innerRef}
-          {...provided.droppableProps}
+    <DroppableContainer
+      droppableId={boardId}
+      type="TODO"
+      className="todo-list"
+      direction="vertical"
+    >
+      {todos.map((todo, index) => (
+        <DraggableContainer
+          key={todo.id}
+          draggableId={todo.id}
+          index={index}
+          className="mb-2"
         >
-          {todos.map((todo, index) => (
-            <Draggable key={todo.id} draggableId={todo.id} index={index}>
-              {(provided) => (
-                <div
-                  className="mb-2"
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                >
-                  <Todo {...todo} />
-                </div>
-              )}
-            </Draggable>
-          ))}
-          {provided.placeholder}
-        </div>
-      )}
-    </Droppable>
+          <Todo {...todo} />
+        </DraggableContainer>
+      ))}
+    </DroppableContainer>
   );
 }

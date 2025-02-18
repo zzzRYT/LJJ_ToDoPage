@@ -101,7 +101,6 @@ const useTodoStore = create<State & Action>((set, get) => ({
       const otherTodos = state.todos.filter(
         (t) => t.boardId !== sourceBoardId && t.boardId !== destinationBoardId
       );
-      console.log([...otherTodos, ...sourceTodos, ...destinationTodos]);
       return { todos: [...otherTodos, ...sourceTodos, ...destinationTodos] };
     }),
 }));
