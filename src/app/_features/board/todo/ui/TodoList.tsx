@@ -33,7 +33,7 @@ export default function TodoList({ boardId }: TodoListProps) {
           </DraggableContainer>
         ))
       ) : (
-        <div className="text-center mt-2 h-screen text-gray-400">
+        <div className="text-center mt-2 h-80 text-gray-400">
           할 일이 없습니다.
         </div>
       )}

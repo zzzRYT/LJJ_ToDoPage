@@ -12,7 +12,7 @@ const Board = (props: BoardType) => {
         <TodoList boardId={props.id} />
       </div>
       <Link
-        className="flex justify-start pl-4 m-5 transition-all rounded-lg hover:bg-gray-200"
+        className="flex justify-start pl-4 m-5 transition-all rounded-lg  hover:bg-gray-200"
         href={{
           pathname: "/info/create",
           query: { type: "todo", boardId: props.id },
