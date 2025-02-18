@@ -21,16 +21,22 @@ export default function TodoList({ boardId }: TodoListProps) {
       className="todo-list"
       direction="vertical"
     >
-      {todos.map((todo, index) => (
-        <DraggableContainer
-          key={todo.id}
-          draggableId={todo.id}
-          index={index}
-          className="mb-2"
-        >
-          <Todo {...todo} />
-        </DraggableContainer>
-      ))}
+      {todos.length !== 0 ? (
+        todos.map((todo, index) => (
+          <DraggableContainer
+            key={todo.id}
+            draggableId={todo.id}
+            index={index}
+            className="mb-2"
+          >
+            <Todo {...todo} />
+          </DraggableContainer>
+        ))
+      ) : (
+        <div className="text-center mt-2 h-screen text-gray-400">
+          할 일이 없습니다.
+        </div>
+      )}
     </DroppableContainer>
   );
 }

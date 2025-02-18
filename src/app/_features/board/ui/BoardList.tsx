@@ -31,11 +31,11 @@ export default function BoardList() {
     if (!result.destination) return;
 
     if (result.type === "BOARD") {
-      moveBoard({
+      boardsApis.moveBoard({
         id: result.draggableId,
         order: result.destination.index,
       });
-      boardsApis.moveBoard({
+      moveBoard({
         id: result.draggableId,
         order: result.destination.index,
       });

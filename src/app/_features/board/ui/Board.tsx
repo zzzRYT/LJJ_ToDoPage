@@ -2,8 +2,9 @@ import { BoardType } from "@/app/_store/boardStore";
 import Link from "next/link";
 import TodoList from "../todo/ui/TodoList";
 import BoardTitle from "./BoardTitle";
+import React from "react";
 
-export default function Board(props: BoardType) {
+const Board = (props: BoardType) => {
   return (
     <>
       <BoardTitle id={props.id} title={props.title} />
@@ -21,4 +22,6 @@ export default function Board(props: BoardType) {
       </Link>
     </>
   );
-}
+};
+
+export default React.memo(Board);
