@@ -26,11 +26,14 @@ body {
   box-sizing: border-box;
 }
 
-.drop-down {
-  background-color: red;
+.drag-over-bottom {
+  border-bottom: 5px solid #007bff !important;
 }
-.drag-over {
+.drag-over-right {
   border-right: 5px solid #007bff !important;
+}
+.drag-over-bottom * {
+  pointer-events: none !important;
 }
 .drag-start {
   opacity: 0.1;

@@ -134,7 +134,7 @@ export const boardHandlers = [
   ),
 
   http.patch<SwitchBoardParams, SwitchBoardRequestBody, EmptyType>(
-    "/api/board/switch/:id",
+    "/api/board/move/:id",
     async ({ params, request }) => {
       const { id } = params;
       // 클라이언트로부터 전달받은 order 값 사용

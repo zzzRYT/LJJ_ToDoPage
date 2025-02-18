@@ -7,7 +7,10 @@ export default function Board(props: BoardType) {
   return (
     <>
       <BoardTitle id={props.id} title={props.title} />
-      <div className="overflow-auto overflow-x-hidden flex flex-col p-2 border-t-2 border-black border-solid flex-grow">
+      <div
+        data-board-id={props.id}
+        className="overflow-auto overflow-x-hidden flex flex-col p-2 border-t-2 border-black border-solid flex-grow"
+      >
         <TodoList boardId={props.id} />
       </div>
       <Link

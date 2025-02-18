@@ -66,7 +66,7 @@ const boardsApis = {
     id: string;
     order: number;
   }): Promise<BoardReturn> => {
-    const response = await fetch(`/api/board/switch/${id}`, {
+    const response = await fetch(`/api/board/move/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
