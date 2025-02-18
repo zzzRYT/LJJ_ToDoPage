@@ -3,14 +3,16 @@ import {
   AddTodoRequestBody,
   DeleteTodoParams,
   EmptyType,
-  SwitchTodoParams,
-  SwitchTodoRequestBody,
+  MoveTodoBetweenBoardsRequestBody,
+  MoveTodoInBoardRequestBody,
+  MoveTodoParams,
   TodoFromBoardParam,
   TodoInfoType,
   UpdateTodoParams,
   UpdateTodoRequestBody,
 } from "./type";
 import { handleStorage } from "@/app/_utils";
+import { TodoType } from "@/app/_features/board/todo/type";
 
 export const todoHandlers = [
   //todo 조회 controller
@@ -109,53 +111,98 @@ export const todoHandlers = [
       });
     }
   ),
-  http.patch<SwitchTodoParams, SwitchTodoRequestBody, EmptyType>(
-    "/api/todos/move/:boardId/:id",
+  http.patch<MoveTodoParams, MoveTodoInBoardRequestBody, EmptyType>(
+    "/api/todos/move/:sourceBoardId",
     async ({ params, request }) => {
-      const { id, boardId } = params;
-      const { order } = await request.json();
+      const { sourceBoardId } = params;
+      const { sourceIndex, destinationIndex } = await request.json();
 
-      const curTodo = handleStorage.get("todo-storage");
-      const targetTodo = curTodo.find((todo: TodoInfoType) => todo.id === id);
-      console.log(targetTodo);
-
-      console.log("mock", id, boardId, order, targetTodo.boardId);
-      if (targetTodo.boardId !== boardId) {
-        targetTodo.boardId = boardId;
+      if (sourceIndex < 0 || destinationIndex < 0) {
+        return HttpResponse.json(null, {
+          status: 400,
+          statusText: "Invalid request parameter. Please check your request.",
+        });
       }
 
-      const startTodoIndex = curTodo.findIndex(
-        (todo: TodoInfoType) => todo.id === id
+      const curTodos = handleStorage.get("todo-storage");
+      const moveTodos = curTodos
+        .filter((t: TodoType) => t.boardId === sourceBoardId)
+        .sort((a: TodoType, b: TodoType) => a.order - b.order);
+      const [movedTodo] = moveTodos.splice(sourceIndex, 1);
+      moveTodos.splice(destinationIndex, 0, movedTodo);
+      moveTodos.forEach((todo: TodoType, i: number) => {
+        todo.order = i + 1;
+      });
+      //보드 교체
+      const newTodos = curTodos.map((todo: TodoType) =>
+        todo.boardId === sourceBoardId
+          ? moveTodos.find((t: TodoType) => t.id === todo.id) || todo
+          : todo
       );
 
-      if (startTodoIndex !== -1) {
-        const [movedTodo] = curTodo.splice(startTodoIndex, 1); // startIndex 요소 제거
-        movedTodo.order = order;
+      handleStorage.set("todo-storage", newTodos);
+      return HttpResponse.json(newTodos, {
+        status: 200,
+        statusText: "Move Successfully",
+      });
+    }
+  ),
+  http.patch<MoveTodoParams, MoveTodoBetweenBoardsRequestBody, EmptyType>(
+    "/api/todos/move/:sourceBoardId/:destinationBoardId",
+    async ({ params, request }) => {
+      const { sourceBoardId, destinationBoardId } = params;
+      const { sourceIndex, destinationIndex } = await request.json();
 
-        // order 위치에 요소 삽입
-        curTodo.splice(order - 1, 0, movedTodo);
-
-        // 나머지 요소들의 order 값 업데이트
-        const boardTodos = curTodo.filter(
-          (todo: TodoInfoType) => todo.boardId === boardId
-        );
-
-        boardTodos.forEach((todo: TodoInfoType, index: number) => {
-          todo.order = index + 1;
-        });
-
-        handleStorage.set("todo-storage", curTodo);
-
-        return HttpResponse.json(curTodo, {
-          status: 200,
-          statusText: "Switch Successfully",
-        });
-      } else {
+      if (sourceIndex < 0 || destinationIndex < 0) {
         return HttpResponse.json(null, {
-          status: 404,
-          statusText: "Todo not found",
+          status: 400,
+          statusText: "Invalid request parameter. Please check your request.",
         });
       }
+
+      //기존 todo
+      const curTodos = handleStorage.get("todo-storage");
+      //시작 todo
+      const sourceTodos = curTodos
+        .filter((t: TodoType) => t.boardId === sourceBoardId)
+        .sort((a: TodoType, b: TodoType) => a.order - b.order);
+      //drop todo
+      const destinationTodos = curTodos
+        .filter((t: TodoType) => t.boardId === destinationBoardId)
+        .sort((a: TodoType, b: TodoType) => a.order - b.order);
+
+      if (sourceIndex < 0 || sourceIndex >= sourceTodos.length) {
+        return HttpResponse.json(null, {
+          status: 400,
+          statusText: "Invalid request parameter. Please check your request.",
+        });
+      }
+
+      const [movedTodo] = sourceTodos.splice(sourceIndex, 1);
+      movedTodo.boardId = destinationBoardId;
+      destinationTodos.splice(destinationIndex, 0, movedTodo);
+      sourceTodos.forEach((todo: TodoType, i: number) => (todo.order = i + 1));
+      destinationTodos.forEach(
+        (todo: TodoType, i: number) => (todo.order = i + 1)
+      );
+      const otherTodos = curTodos.filter(
+        (t: TodoType) =>
+          t.boardId !== sourceBoardId && t.boardId !== destinationBoardId
+      );
+
+      handleStorage.set("todo-storage", [
+        ...otherTodos,
+        ...sourceTodos,
+        ...destinationTodos,
+      ]);
+
+      return HttpResponse.json(
+        [...otherTodos, ...sourceTodos, ...destinationTodos],
+        {
+          status: 200,
+          statusText: "Move Successfully",
+        }
+      );
     }
   ),
 ];

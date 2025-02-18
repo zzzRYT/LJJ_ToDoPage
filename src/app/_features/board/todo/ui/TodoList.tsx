@@ -1,66 +1,41 @@
-import useDragAndDrop, { DragEndEvent } from "@/app/_hooks/useDragAndDrop";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { TodoType } from "../type";
-import todoApis from "../apis";
-import Todo from "./Todo";
 import useTodoStore from "@/app/_store/todoStore";
+import Todo from "./Todo";
 
-export default function TodoList({ boardId }: Pick<TodoType, "boardId">) {
-  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
-    useDragAndDrop("todo");
+interface TodoListProps {
+  boardId: TodoType["boardId"];
+}
 
-  const { getTodos, moveTodo } = useTodoStore();
-
-  //drag event
-  const dragEndEvent: DragEndEvent = (from, to, board) => {
-    if (from === to.toString()) return;
-    todoApis.moveTodo({ todoId: from, order: to, boardId: board! });
-    moveTodo({ id: from, order: to, boardId: board! });
-  };
+export default function TodoList({ boardId }: TodoListProps) {
+  const { getTodos } = useTodoStore();
+  const todos = getTodos(boardId);
 
   return (
-    <>
-      {getTodos(boardId).map((todo) => {
-        const propsData = {
-          ...todo,
-          boardId: boardId,
-        };
-        return (
-          <div
-            key={todo.id}
-            data-board-id={todo.boardId}
-            data-todo-id={todo.id}
-            draggable
-            onDragStart={(e) => {
-              e.stopPropagation();
-              onDragStart(e, { from: todo.id });
-            }}
-            onDragEnter={(e) => {
-              e.stopPropagation();
-              onDragEnter(e, {
-                from: todo.id,
-                to: todo.order,
-                board: todo.boardId,
-              });
-            }}
-            onDragEnd={(e) => {
-              e.stopPropagation();
-              onDragEnd(e, {
-                dragEndEvent,
-              });
-            }}
-            onDragLeave={(e) => {
-              e.stopPropagation();
-              onDragLeave(e, { from: todo.id });
-            }}
-            onDragOver={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            <Todo {...propsData} />
-          </div>
-        );
-      })}
-    </>
+    <Droppable droppableId={boardId} type="TODO">
+      {(provided) => (
+        <div
+          className="todo-list"
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+        >
+          {todos.map((todo, index) => (
+            <Draggable key={todo.id} draggableId={todo.id} index={index}>
+              {(provided) => (
+                <div
+                  className="mb-2"
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                >
+                  <Todo {...todo} />
+                </div>
+              )}
+            </Draggable>
+          ))}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
   );
 }

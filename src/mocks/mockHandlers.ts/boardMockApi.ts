@@ -137,38 +137,42 @@ export const boardHandlers = [
     "/api/board/move/:id",
     async ({ params, request }) => {
       const { id } = params;
+      // 클라이언트로부터 전달받은 order 값 사용
       const { order } = await request.json();
 
-      const boards = handleStorage.get("board-storage");
+      // 스토리지에서 보드 목록을 가져옴
+      const boards: BoardInfoType[] = handleStorage.get("board-storage") || [];
 
-      const startBoardIndex = boards.findIndex(
+      // 이동할 보드의 현재 인덱스 찾기
+      const boardIndex = boards.findIndex(
         (board: { id: string }) => board.id === id
       );
 
-      if (startBoardIndex !== -1) {
-        const [movedBoard] = boards.splice(startBoardIndex, 1); // startIndex 요소 제거
-        movedBoard.order = order;
-
-        // order 위치에 요소 삽입
-        boards.splice(order - 1, 0, movedBoard);
-
-        // 나머지 요소들의 order 값 업데이트
-        boards.forEach((board: BoardInfoType, index: number) => {
-          board.order = index + 1;
-        });
-
-        handleStorage.set("board-storage", boards);
-
-        return HttpResponse.json(boards, {
-          status: 200,
-          statusText: "Switched Successfully",
-        });
-      } else {
+      if (boardIndex === -1) {
         return HttpResponse.json(null, {
           status: 404,
           statusText: "Board not found",
         });
       }
+
+      // 보드 배열에서 해당 보드를 제거
+      const [movedBoard] = boards.splice(boardIndex, 1);
+      // 새로운 순서(order 값이 1-indexed이면 배열 index는 order - 1)
+      const insertionIndex = Math.max(0, Math.min(order - 1, boards.length));
+      boards.splice(insertionIndex, 0, movedBoard);
+
+      // 전체 보드의 order 값을 재할당 (1부터 순차적으로)
+      boards.forEach((board: BoardInfoType, index: number) => {
+        board.order = index + 1;
+      });
+
+      // 스토리지에 업데이트된 보드 목록 저장
+      handleStorage.set("board-storage", boards);
+
+      return HttpResponse.json(boards, {
+        status: 200,
+        statusText: "Switched Successfully",
+      });
     }
   ),
 ];

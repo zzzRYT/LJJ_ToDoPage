@@ -20,6 +20,10 @@ type TodoInfoType = {
   todo: string;
   order: number;
   isCompleted: boolean;
+  sourceIndex: number;
+  sourceBoardId: string;
+  destinationIndex: number;
+  destinationBoardId: string;
 };
 
 //Todo Type
@@ -28,5 +32,16 @@ export type AddTodoRequestBody = Pick<TodoInfoType, "todo">;
 export type UpdateTodoParams = Pick<TodoInfoType, "id">;
 export type UpdateTodoRequestBody = Pick<TodoInfoType, "todo" | "isCompleted">;
 export type DeleteTodoParams = Pick<TodoInfoType, "id">;
-export type SwitchTodoParams = Pick<TodoInfoType, "id" | "boardId">;
-export type SwitchTodoRequestBody = Pick<TodoInfoType, "order">;
+type MoveTodoParams = Pick<
+  TodoInfoType,
+  "sourceBoardId" | "destinationBoardId"
+>;
+type MoveTodoRequestBody = Pick<
+  TodoInfoType,
+  "sourceIndex" | "destinationIndex"
+>;
+export type MoveTodoInBoardRequestBody = Omit<
+  MoveTodoRequestBody,
+  "destinationBoardId"
+>;
+export type MoveTodoBetweenBoardsRequestBody = MoveTodoRequestBody;
