@@ -8,6 +8,7 @@ const unhandledRequest = [
   "/ellipsisIcon.svg",
   "/?_rsc",
   "_next",
+  "__next",
   "www.gstatic.com",
   "translate.googleapis.com",
   "fonts.gstatic.com",
