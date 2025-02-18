@@ -22,7 +22,8 @@ export default function BoardList() {
     setTodos(response);
   };
 
-  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } = useDragAndDrop();
+  const { onDragEnd, onDragEnter, onDragLeave, onDragStart } =
+    useDragAndDrop("board");
   const dragEndEvent: DragEndEvent = (from, to) => {
     if (from === to.toString()) return;
     boardsApis.switchBoard({ id: from, order: to });
@@ -41,17 +42,17 @@ export default function BoardList() {
       {boards.map((board) => {
         return (
           <div
-            className="mr-2 w-[350px] min-w-[350px] flex flex-col overflow-hidden rounded-lg transition-transform duration-75 border border-gray-700"
+            className="mr-2 w-[350px] min-w-[350px] flex flex-col overflow-hidden rounded-lg transition-transform duration-75 border border-gray-700 "
             key={board.id}
+            data-board-id={board.id}
             draggable
             onDragStart={(e) => {
-              onDragStart(e, { from: board.id, board: board.id });
+              onDragStart(e, { from: board.id });
             }}
             onDragEnter={(e) => {
               onDragEnter(e, {
                 from: board.id,
                 to: board.order,
-                board: board.id,
               });
             }}
             onDragEnd={(e) => {
@@ -59,9 +60,7 @@ export default function BoardList() {
                 dragEndEvent,
               });
             }}
-            onDragLeave={(e) =>
-              onDragLeave(e, { from: board.id, board: board.id })
-            }
+            onDragLeave={(e) => onDragLeave(e, { from: board.id })}
             onDragOver={(e) => e.preventDefault()}
           >
             <Board {...board} />

@@ -134,7 +134,7 @@ export const boardHandlers = [
   ),
 
   http.patch<SwitchBoardParams, SwitchBoardRequestBody, EmptyType>(
-    "/api/board/switch/:id",
+    "/api/board/move/:id",
     async ({ params, request }) => {
       const { id } = params;
       const { order } = await request.json();

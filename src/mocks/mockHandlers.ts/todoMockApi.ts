@@ -117,7 +117,9 @@ export const todoHandlers = [
 
       const curTodo = handleStorage.get("todo-storage");
       const targetTodo = curTodo.find((todo: TodoInfoType) => todo.id === id);
+      console.log(targetTodo);
 
+      console.log("mock", id, boardId, order, targetTodo.boardId);
       if (targetTodo.boardId !== boardId) {
         targetTodo.boardId = boardId;
       }
