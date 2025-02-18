@@ -4,13 +4,25 @@ import { EditBoardHandlerParams, RemoveBoardHandlerParams } from "./type";
 import useTodoStore from "@/app/_store/todoStore";
 import todoApis from "./todo/apis";
 import { DropResult } from "@hello-pangea/dnd";
+import { toast } from "react-toastify";
 
 export async function editBoardHandler({ id, title }: EditBoardHandlerParams) {
-  const response = await boardsApis.updateBoard({
-    id,
-    title,
-  });
-  useBoardStore.getState().updateBoard(response);
+  try {
+    const response = await boardsApis.updateBoard({
+      id,
+      title,
+    });
+    useBoardStore.getState().updateBoard(response);
+  } catch (error: unknown) {
+    if (error as Error) {
+      if (
+        (error as Error).message ===
+        "Title은 1자 이상 15자 이하로 입력해주세요."
+      ) {
+        toast.error("보드는 1 ~ 15 글자 사이로 입력해주세요.");
+      }
+    }
+  }
 }
 
 export async function removeBoardHandler({ id }: RemoveBoardHandlerParams) {

@@ -42,8 +42,7 @@ const boardsApis = {
 
     if (!response.ok) {
       if (response.status === 400) {
-        toast.error("보드는 1 ~ 15 글자 사이로 입력해주세요.");
-        return;
+        throw new Error("Title은 1자 이상 15자 이하로 입력해주세요.");
       }
       toast.error("보드 추가를 실패했습니다. 새로고침 후 다시 시도해 주세요.");
     }

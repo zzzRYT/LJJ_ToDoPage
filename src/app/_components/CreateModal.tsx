@@ -36,7 +36,7 @@ export default function CreateModal() {
     e.preventDefault();
     if (type === "board") {
       try {
-        const response = await boardsApis.addBoard(info.title);
+        const response = await boardsApis.addBoard({ title: info.title });
         addBoard(response);
       } catch {
         toast.error("Title은 1자 이상 15자 이하로 입력해주세요.");
