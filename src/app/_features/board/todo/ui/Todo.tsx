@@ -93,7 +93,7 @@ export default function Todo(props: TodoType) {
   }, [ellipsisInfo.isEdit]);
 
   return (
-    <div className="border-b-2 p-2 m-1 flex items-center hover:bg-gray-100 ">
+    <div className="border-b-2 p-2 m-1 flex items-center hover:bg-gray-100">
       <input
         type="checkbox"
         checked={ellipsisInfo.isCompleted}

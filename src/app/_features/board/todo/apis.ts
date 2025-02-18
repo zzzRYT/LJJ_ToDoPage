@@ -62,22 +62,48 @@ const todoApis = {
     }
     return response.json();
   },
-  moveTodo: async ({
-    todoId,
-    boardId,
-    order,
+  moveTodoInBoard: async ({
+    sourceBoardId,
+    sourceIndex,
+    destinationIndex,
   }: {
-    boardId: string;
-    todoId: string;
-    order: number;
+    sourceBoardId: string;
+    sourceIndex: number;
+    destinationIndex: number;
   }): Promise<TodoType[]> => {
-    const response = await fetch(`/api/todos/move/${boardId}/${todoId}`, {
+    const response = await fetch(`/api/todos/move/${sourceBoardId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ order }),
+      body: JSON.stringify({ sourceIndex, destinationIndex }),
     });
+    if (!response.ok) {
+      throw new Error("Failed to move a todo");
+    }
+    return response.json();
+  },
+  moveTodoBetweenBoards: async ({
+    destinationBoardId,
+    destinationIndex,
+    sourceBoardId,
+    sourceIndex,
+  }: {
+    sourceBoardId: string;
+    destinationBoardId: string;
+    sourceIndex: number;
+    destinationIndex: number;
+  }): Promise<TodoType[]> => {
+    const response = await fetch(
+      `/api/todos/move/${sourceBoardId}/${destinationBoardId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sourceIndex, destinationIndex }),
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to move a todo");
     }
